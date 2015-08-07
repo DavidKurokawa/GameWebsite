@@ -1,6 +1,8 @@
-function Card(ctx, locX, locY, card) {
+function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
     // construct the card
     this.ctx = ctx;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
     this.img = new Image();
     this.img.width = 100;
     this.img.height = 145;
@@ -19,6 +21,20 @@ function Card(ctx, locX, locY, card) {
         return this.img.locX < x && x < this.img.locX + this.img.width
                 && this.img.locY < y && y < this.img.locY + this.img.height;
     }
+    
+    // check if the card were at the given coordinates would it still be on the canvas
+    this.isInsideCanvas = function(x, y) {
+        var cardX1 = x;
+        var cardX2 = x + this.img.width;
+        var cardY1 = y;
+        var cardY2 = y + this.img.height;
+        var canvasX1 = 0;
+        var canvasX2 = canvasWidth;
+        var canvasY1 = 0;
+        var canvasY2 = canvasHeight;
+        return canvasX1 <= cardX1 && cardX2 <= canvasX2
+                && canvasY1 <= cardY1 && cardY2 <= canvasY2;
+    }
 
     // check if the card is contained in the given rectangle
     this.isContainedIn = function(x1, y1, x2, y2) {
@@ -30,10 +46,8 @@ function Card(ctx, locX, locY, card) {
         var cardX2 = this.img.locX + this.img.width;
         var cardY1 = this.img.locY;
         var cardY2 = this.img.locY + this.img.height;
-        return rectX1 <= cardX1 && cardX1 <= rectX2
-                && rectX1 <= cardX2 && cardX2 <= rectX2
-                && rectY1 <= cardY1 && cardY1 <= rectY2
-                && rectY1 <= cardY2 && cardY2 <= rectY2;
+        return rectX1 <= cardX1 && cardX2 <= rectX2
+                && rectY1 <= cardY1 && cardY2 <= rectY2;
     }
 
     // draw the card

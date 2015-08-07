@@ -1,7 +1,5 @@
-// TODO: implement a context-menu that lets me shuffle and form a deck
+// TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
 // TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
-// TODO: fix the issues with cards being able to leave the canvas (such as when we select two cards and then move them)
-// TODO: fix the issue where if we have a group of cards selected and we click on one card then it should unselect all other cards but it doesn't do that
 
 // initialize
 function initialize() {
@@ -14,7 +12,6 @@ function initialize() {
     var canvasWidth = canvas.width;
     var canvasHeight = canvas.height;
     var shouldRender = false;
-    var isDragging = false;
     var groupSelectionX;
     var groupSelectionY;
     var isGroupSelecting = false;
@@ -22,6 +19,8 @@ function initialize() {
     // set up mouse
     var mouseX;
     var mouseY;
+    var isMouseDown = false;
+    var hasMouseMovedWhenDown = false;
 
     // set up cards
     function fullDeck() {
@@ -29,7 +28,7 @@ function initialize() {
         var x = 10;
         for (suit of ["S", "H", "C", "D"]) {
             for (rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
-                ret.push(new Card(ctx, x, 10, rank + suit));
+                ret.push(new Card(ctx, canvasWidth, canvasHeight, x, 10, rank + suit));
                 x += 20;
             }
         }
@@ -40,12 +39,11 @@ function initialize() {
     setTimeout(redrawAll, 200);
     
     // set up listeners
-    $("#canvas").mousedown(function(e){handleMouseDown(e);});
-    $("#canvas").mousemove(function(e){handleMouseMove(e);});
-    $("#canvas").mouseup(function(e){handleMouseUp(e);});
-    $("#canvas").mouseout(function(e){handleMouseOut(e);});
-    $("#canvas").click(function(e){handleMouseClick(e);});
-    $("#canvas").dblclick(function(e){handleDoubleClick(e);});
+    $(document).mousedown(function(e){handleMouseDown(e);});
+    $(document).mousemove(function(e){handleMouseMove(e);});
+    $(document).mouseup(function(e){handleMouseUp(e);});
+    $(document).mouseout(function(e){handleMouseOut(e);});
+    $(document).dblclick(function(e){handleDoubleClick(e);});
     $(document).keypress(function(e){handleKeyPress(e);});
 
     // Knuth-shuffle an array
@@ -168,8 +166,9 @@ function initialize() {
 
     // handle mouse down events
     function handleMouseDown(e) {
+        hasMouseMovedWhenDown = false;
         shouldRender = true;
-        isDragging = true;
+        isMouseDown = true;
         var x = parseInt(e.clientX - offsetX);
         var y = parseInt(e.clientY - offsetY);
         var selected = getLookedAtCard(x, y);
@@ -217,9 +216,18 @@ function initialize() {
                 }
             });
         }
+        if (!e.ctrlKey && !hasMouseMovedWhenDown) {
+            var x = parseInt(mouseX - offsetX);
+            var y = parseInt(mouseY - offsetY);
+            unselectAll();
+            var selected = getLookedAtCard(x, y);
+            if (typeof selected !== 'undefined') {
+                selected.select(x, y);
+            }
+        }
         // clean up
         shouldRender = false;
-        isDragging = false;
+        isMouseDown = false;
         isGroupSelecting = false;
         redrawAll();
     }
@@ -228,22 +236,35 @@ function initialize() {
     function handleMouseOut(e) {
         // user has left the canvas, so clear the drag flag
         //shouldRender = false;
-        //isDragging = false;
+        //isMouseDown = false;
     }
 
     // handle mouse move events
     function handleMouseMove(e) {
+        hasMouseMovedWhenDown = true;
         mouseX = e.clientX;
         mouseY = e.clientY;
-        if (isDragging) {
-            var x = parseInt(e.clientX - offsetX);
-            var y = parseInt(e.clientY - offsetY);
+        var x = parseInt(e.clientX - offsetX);
+        var y = parseInt(e.clientY - offsetY);
+        if (isMouseDown && !isGroupSelecting) {
+            // first check if moving the cards will not cause any to leave the canvas
+            var allInside = true;
             cards.foreach(function(card) {
                 if (card.isSelected) {
-                    card.img.locX = x - card.draggingOffsetX;
-                    card.img.locY = y - card.draggingOffsetY;
+                    var newX = x - card.draggingOffsetX;
+                    var newY = y - card.draggingOffsetY;
+                    allInside = allInside && card.isInsideCanvas(newX, newY);
                 }
             });
+            // move cards if doing so will not cause any to leave the canvas
+            if (allInside) {
+                cards.foreach(function(card) {
+                    if (card.isSelected) {
+                        card.img.locX = x - card.draggingOffsetX;
+                        card.img.locY = y - card.draggingOffsetY;
+                    }
+                });
+            }
         }
         if (shouldRender) {
             redrawAll();
@@ -252,12 +273,6 @@ function initialize() {
             ctx.strokeStyle = "#FF0000";
             ctx.strokeRect(groupSelectionX, groupSelectionY, mouseX - groupSelectionX, mouseY - groupSelectionY);
         }
-    }
-
-    // handle mouse click events
-    function handleMouseClick(e) {
-        // TODO!
-        console.log('mouse click');
     }
 
     // handle mouse double click events
