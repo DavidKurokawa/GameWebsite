@@ -57,6 +57,16 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
         this.ctx.strokeRect(this.img.locX, this.img.locY, this.img.width, this.img.height);
     };
 
+    // move the card
+    this.move = function(x, y) {
+        x = Math.max(x, 0);
+        x = Math.min(x, canvasWidth - this.img.width);
+        y = Math.max(y, 0);
+        y = Math.min(y, canvasHeight - this.img.height);
+        this.img.locX = x;
+        this.img.locY = y;
+    }
+
     // select the card
     this.select = function(x, y) {
         this.isSelected = true;
