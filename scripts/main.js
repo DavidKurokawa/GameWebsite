@@ -1,9 +1,15 @@
 // TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
 // TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
+// TODO: the mouse doesn't work well when the screen is scrolled!
 
 // initialize
 function initialize() {
+    // set up socket.io
+    var socket = io();
+    socket.on("msg", function(msg) { parseSocketMessage(msg); });
+    var identity;
+
     // set up canvas
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
@@ -21,7 +27,7 @@ function initialize() {
     var mouseX;
     var mouseY;
     var isMouseDown = false;
-    var hasMouseMovedWhenDown = false;
+    var hasMouseMovedWhenDown;
 
     // set up cards
     function fullDeck() {
@@ -35,17 +41,45 @@ function initialize() {
         }
         return ret;
     }
-    var cards = new DoublyLinkedList(fullDeck());
+    var map = fullDeck();
+    for (var i = 0; i < map.length; ++i) {
+        map[i].id = i;
+    }
+    var cards = new DoublyLinkedList(map);
     // TODO: this is pretty hacky!
-    setTimeout(redrawAll, 200);
+    setTimeout(redrawAll, 2000);
     
     // set up listeners
     $(document).mousedown(function(e){handleMouseDown(e);});
     $(document).mousemove(function(e){handleMouseMove(e);});
     $(document).mouseup(function(e){handleMouseUp(e);});
-    $(document).mouseout(function(e){handleMouseOut(e);});
     $(document).dblclick(function(e){handleDoubleClick(e);});
     $(document).keypress(function(e){handleKeyPress(e);});
+
+    // parse a socket.io message
+    function parseSocketMessage(msg) {
+        if (msg == "user connected") {
+            console.log("A new user has joined!");
+        } else if (msg == "user disconnected") {
+            console.log("A user has left.");
+        } else {
+            var split = msg.split(" ");
+            if (split[0] == "mv") {
+                var cardIdx = parseInt(split[1]);
+                var x = parseInt(split[2]);
+                var y = parseInt(split[3]);
+                map[cardIdx].move(x, y);
+                redrawAll();
+            } else if (split[0] == "identity") {
+                identity = parseInt(split[1]);
+            }
+        }
+    }
+
+    // send a socket.io message
+    function sendSocketMessage(msg) {
+        socket.emit("msg", msg);
+    }
 
     // Knuth-shuffle an array
     function shuffle(arr) {
@@ -232,13 +266,6 @@ function initialize() {
         redrawAll();
     }
 
-    // handle mouse out events
-    function handleMouseOut(e) {
-        // user has left the canvas, so clear the drag flag
-        //shouldRender = false;
-        //isMouseDown = false;
-    }
-
     // handle mouse move events
     function handleMouseMove(e) {
         hasMouseMovedWhenDown = true;
@@ -249,7 +276,10 @@ function initialize() {
         if (isMouseDown && !isGroupSelecting) {
             cards.foreach(function(card) {
                 if (card.isSelected) {
-                    card.move(x - card.draggingOffsetX, y - card.draggingOffsetY);
+                    var newX = x - card.draggingOffsetX;
+                    var newY = y - card.draggingOffsetY;
+                    card.move(newX, newY);
+                    sendSocketMessage("mv " + card.id + " " + newX + " " + newY);
                 }
             });
         }
@@ -275,7 +305,7 @@ function initialize() {
 
     // handle key press events
     function handleKeyPress(e) {
-        console.log(e.keyCode);
+        console.log("keycode = " + e.keyCode);
         if (e.keyCode == 0 || e.keyCode == 32) {
             formDeck(mouseX, mouseY);
         } else if (e.keyCode == 13) {

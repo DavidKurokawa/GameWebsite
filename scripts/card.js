@@ -8,8 +8,8 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
     this.img.height = 145;
     this.img.locX = locX;
     this.img.locY = locY;
-    this.img.frontSrc = "./static/img/" + card + ".png";
-    this.img.backSrc = "./static/img/back.jpg";
+    this.img.frontSrc = "./imgs/" + card + ".png";
+    this.img.backSrc = "./imgs/back.jpg";
     this.isUp = true;
     this.isSelected = false;
     this.draggingOffsetX = 0;
