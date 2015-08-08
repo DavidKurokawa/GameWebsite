@@ -1,7 +1,6 @@
 // TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
 // TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
-// TODO: 
 
 // initialize
 function initialize() {
@@ -87,7 +86,6 @@ function initialize() {
                 var cardX = card.img.locX;
                 var cardY = card.img.locY;
                 if (x != cardX || y != cardY) {
-                    done = false;
                     var dist = Math.sqrt((x - cardX)*(x - cardX) + (y - cardY)*(y - cardY));
                     var newX = x;
                     var newY = y;
@@ -95,8 +93,8 @@ function initialize() {
                         newX = cardX + SPEED*(x - cardX)/dist;
                         newY = cardY + SPEED*(y - cardY)/dist;
                     }
-                    card.img.locX = newX;
-                    card.img.locY = newY;
+                    card.move(newX, newY);
+                    done = done && cardX == card.img.locX && cardY == card.img.locY;
                 }
             }
             redrawAll();
