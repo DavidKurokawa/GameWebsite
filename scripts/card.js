@@ -1,5 +1,6 @@
-function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
+function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
     // construct the card
+    this.id;
     this.ctx = ctx;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
@@ -15,6 +16,7 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
     this.draggingOffsetX = 0;
     this.draggingOffsetY = 0;
     this.img.src = this.img.frontSrc;
+    this.socket = socket;
 
     // check if the card contains the given coordinates
     this.isXYInside = function(x, y) {
@@ -58,13 +60,16 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
     };
 
     // move the card
-    this.move = function(x, y) {
+    this.move = function(x, y, report) {
         x = Math.max(x, 0);
         x = Math.min(x, canvasWidth - this.img.width);
         y = Math.max(y, 0);
         y = Math.min(y, canvasHeight - this.img.height);
         this.img.locX = x;
         this.img.locY = y;
+        if (report) {
+            this.socket.emit("msg", "mv " + this.id + " " + x + " " + y);
+        }
     }
 
     // select the card
@@ -88,8 +93,11 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card) {
     }
 
     // flip the card
-    this.flip = function() {
+    this.flip = function(report) {
         this.isUp = !this.isUp;
         this.img.src = this.isUp ? this.img.frontSrc : this.img.backSrc;
+        if (report) {
+            this.socket.emit("msg", "fl " + this.id);
+        }
     }
 }

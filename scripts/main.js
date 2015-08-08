@@ -18,7 +18,6 @@ function initialize() {
     var offsetY = canvasOffset.top;
     var canvasWidth = canvas.width;
     var canvasHeight = canvas.height;
-    var shouldRender = false;
     var groupSelectionX;
     var groupSelectionY;
     var isGroupSelecting = false;
@@ -35,7 +34,7 @@ function initialize() {
         var x = 10;
         for (suit of ["S", "H", "C", "D"]) {
             for (rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
-                ret.push(new Card(ctx, canvasWidth, canvasHeight, x, 10, rank + suit));
+                ret.push(new Card(ctx, canvasWidth, canvasHeight, x, 10, rank + suit, socket));
                 x += 20;
             }
         }
@@ -47,7 +46,7 @@ function initialize() {
     }
     var cards = new DoublyLinkedList(map);
     // TODO: this is pretty hacky!
-    setTimeout(redrawAll, 2000);
+    setTimeout(function() {redrawAll(false);}, 2000);
     
     // set up listeners
     $(document).mousedown(function(e){handleMouseDown(e);});
@@ -68,17 +67,19 @@ function initialize() {
                 var cardIdx = parseInt(split[1]);
                 var x = parseInt(split[2]);
                 var y = parseInt(split[3]);
-                map[cardIdx].move(x, y);
-                redrawAll();
+                map[cardIdx].move(x, y, false);
+            } else if (split[0] == "fl") {
+                var cardIdx = parseInt(split[1]);
+                map[cardIdx].flip(false);
+            } else if (split[0] == "rd") {
+                redrawAll(false);
+            } else if (split[0] == "tt") {
+                var cardIdx = parseInt(split[1]);
+                moveCardToTop(map[cardIdx], false);
             } else if (split[0] == "identity") {
                 identity = parseInt(split[1]);
             }
         }
-    }
-
-    // send a socket.io message
-    function sendSocketMessage(msg) {
-        socket.emit("msg", msg);
     }
 
     // Knuth-shuffle an array
@@ -92,11 +93,14 @@ function initialize() {
     }
 
     // redraw the canvas and all cards
-    function redrawAll() {
+    function redrawAll(report) {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         cards.foreach(function(card) {
             card.draw();
         });
+        if (report) {
+            socket.emit("msg", "rd");
+        }
     }
 
     // get all selected cards
@@ -108,6 +112,15 @@ function initialize() {
             }
         });
         return ret;
+    }
+
+    // move given card to top (i.e. last to be drawn)
+    function moveCardToTop(card, report) {
+console.log(card);
+        cards.moveToTail(card.node);
+        if (report) {
+            socket.emit("msg", "tt " + card.id);
+        }
     }
 
     // move selected cards slowly to the given coordinates
@@ -127,11 +140,11 @@ function initialize() {
                         newX = cardX + SPEED*(x - cardX)/dist;
                         newY = cardY + SPEED*(y - cardY)/dist;
                     }
-                    card.move(newX, newY);
+                    card.move(newX, newY, true);
                     done = done && cardX == card.img.locX && cardY == card.img.locY;
                 }
             }
-            redrawAll();
+            redrawAll(true);
             if (done) {
                 clearInterval(job);
             }
@@ -150,24 +163,24 @@ function initialize() {
         var selected = [];
         cards.foreach(function(card) {
             if (card.isSelected) {
-                selected.push(card.node);
+                selected.push(card);
             }
         });
         shuffle(selected);
         for (var i = 0; i < selected.length; ++i) {
-            cards.moveToTail(selected[i]);
+            moveCardToTop(selected[i], true);
         }
-        redrawAll();
+        redrawAll(true);
     }
 
     // flip the selected cards
     function flipSelected() {
         cards.foreach(function(card) {
             if (card.isSelected) {
-                card.flip();
+                card.flip(true);
             }
         });
-        redrawAll();
+        redrawAll(true);
     }
 
     // get the card the mouse is currently over
@@ -201,7 +214,6 @@ function initialize() {
     // handle mouse down events
     function handleMouseDown(e) {
         hasMouseMovedWhenDown = false;
-        shouldRender = true;
         isMouseDown = true;
         var x = parseInt(e.clientX - offsetX);
         var y = parseInt(e.clientY - offsetY);
@@ -230,7 +242,7 @@ function initialize() {
             }
         }
         if (selected != null) {
-            cards.moveToTail(selected.node);
+            moveCardToTop(selected, true);
         }
         // group selection
         if (selected == null) {
@@ -249,6 +261,7 @@ function initialize() {
                     card.toggleSelected();
                 }
             });
+            redrawAll(false);
         }
         if (!e.ctrlKey && !hasMouseMovedWhenDown) {
             var x = parseInt(mouseX - offsetX);
@@ -258,12 +271,11 @@ function initialize() {
             if (typeof selected !== 'undefined') {
                 selected.select(x, y);
             }
+            redrawAll(true);
         }
         // clean up
-        shouldRender = false;
         isMouseDown = false;
         isGroupSelecting = false;
-        redrawAll();
     }
 
     // handle mouse move events
@@ -278,13 +290,12 @@ function initialize() {
                 if (card.isSelected) {
                     var newX = x - card.draggingOffsetX;
                     var newY = y - card.draggingOffsetY;
-                    card.move(newX, newY);
-                    sendSocketMessage("mv " + card.id + " " + newX + " " + newY);
+                    card.move(newX, newY, true);
                 }
             });
         }
-        if (shouldRender) {
-            redrawAll();
+        if (isMouseDown) {
+            redrawAll(!isGroupSelecting);
         }
         if (isGroupSelecting) {
             ctx.strokeStyle = "#FF0000";
@@ -298,8 +309,9 @@ function initialize() {
         var y = e.clientY;
         var selected = getLookedAtCard(x, y);
         if (selected != null) {
-            selected.flip();
-            selected.draw();
+            selected.flip(true);
+            //selected.draw();
+            redrawAll(true); // TODO: perhaps I should use selected.draw() but then I have to send that to the server
         }
     }
 
