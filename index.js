@@ -1,33 +1,53 @@
+// setup
 var express = require("express");
 var app = express();
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var numConnections = 0;
+var sockets = [];
+setInterval(requestStatusReport, 10000);
 
+// link files
 app.use("/scripts", express.static(__dirname + "/scripts"));
 app.use("/imgs", express.static(__dirname + "/imgs"));
 app.get("/", function(req, res) {
     res.sendfile("index.html");
 });
 
-var userConnectedStr = "user connected";
-var userDisconnectedStr = "user disconnected";
+// emit the given message to the given medium
+function emit(medium, msg) {
+    console.log("msg: " + msg);
+    medium.emit("msg", msg);
+}
 
+// request a status report from some active connection
+function requestStatusReport() {
+    for (var i = 0; i < sockets.length; ++i) {
+        if (sockets[i].connected) {
+            emit(sockets[i], "rs");
+            break;
+        }
+    }
+}
+
+// connection handler
 io.on("connection", function(socket) {
-    console.log(userConnectedStr);
-    socket.broadcast.emit(userConnectedStr);
-    socket.emit("msg", "identity " + numConnections);
+    // handle a connection
+    emit(socket.broadcast, "u+");
+    requestStatusReport();
+    sockets.push(socket);
+
+    // disconnect handler
     socket.on("disconnect", function() {
-        console.log(userDisconnectedStr);
-        socket.broadcast.emit("msg", userDisconnectedStr);
+        emit(socket.broadcast, "u-");
     });
+
+    // message handler
     socket.on("msg", function(msg) {
-        console.log("message: " + msg);
-        socket.broadcast.emit("msg", msg);
+        emit(socket.broadcast, msg);
     });
-    ++numConnections;
 });
 
+// listen for http connections
 http.listen(9090, function() {
     console.log("listening on *:9090");
 });

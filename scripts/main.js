@@ -1,7 +1,5 @@
 // TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
-// TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
-// TODO: when someone joins, they just see a new deck and not the current state
 // TODO: there are some obvious issues with timing and the states can get a bit out of whack (not sure if this should be fixed?)
 
 // initialize
@@ -9,7 +7,6 @@ function initialize() {
     // set up socket.io
     var socket = io();
     socket.on("msg", function(msg) { parseSocketMessage(msg); });
-    var identity;
 
     // set up canvas
     var canvas = document.getElementById("canvas");
@@ -50,44 +47,60 @@ function initialize() {
     setTimeout(function() {redrawAll(false);}, 2000);
     
     // set up listeners
-    $(document).mousedown(function(e){handleMouseDown(e);});
-    $(document).mousemove(function(e){handleMouseMove(e);});
-    $(document).mouseup(function(e){handleMouseUp(e);});
-    $(document).dblclick(function(e){handleDoubleClick(e);});
-    $(document).keypress(function(e){handleKeyPress(e);});
+    $(document).mousedown(function(e) { handleMouseDown(e); });
+    $(document).mousemove(function(e) { handleMouseMove(e); });
+    $(document).mouseup(function(e) { handleMouseUp(e); });
+    $(document).dblclick(function(e) { handleDoubleClick(e); });
+    $(document).keypress(function(e) { handleKeyPress(e); });
 
     // parse a socket.io message
     function parseSocketMessage(msg) {
-        if (msg == "user connected") {
+        var split = msg.split(" ");
+        var cmd = split[0];
+        if (cmd == "mv") {
+            var cardIdx = parseInt(split[1]);
+            var x = parseInt(split[2]);
+            var y = parseInt(split[3]);
+            map[cardIdx].move(x, y, false);
+        } else if (cmd == "fl") {
+            var cardIdx = parseInt(split[1]);
+            map[cardIdx].flip(false);
+        } else if (cmd == "rd") {
+            redrawAll(false);
+        } else if (cmd == "tt") {
+            var cardIdx = parseInt(split[1]);
+            moveCardToTop(map[cardIdx], false);
+        } else if (cmd == "fd") {
+            var x = parseInt(split[1]);
+            var y = parseInt(split[2]);
+            var arr = new Array(split.length - 3);
+            for (var i = 3; i < split.length; ++i)
+                arr[i - 3] = map[parseInt(split[i])];
+            formDeck(x, y, arr, false);
+        } else if (cmd == "u+") {
             console.log("A new user has joined!");
-        } else if (msg == "user disconnected") {
+        } else if (cmd == "u-") {
             console.log("A user has left.");
-        } else {
-            var split = msg.split(" ");
-            if (split[0] == "mv") {
-                var cardIdx = parseInt(split[1]);
-                var x = parseInt(split[2]);
-                var y = parseInt(split[3]);
-                map[cardIdx].move(x, y, false);
-            } else if (split[0] == "fl") {
-                var cardIdx = parseInt(split[1]);
-                map[cardIdx].flip(false);
-            } else if (split[0] == "rd") {
-                redrawAll(false);
-            } else if (split[0] == "tt") {
-                var cardIdx = parseInt(split[1]);
-                moveCardToTop(map[cardIdx], false);
-            } else if (split[0] == "fd") {
-                var x = parseInt(split[1]);
-                var y = parseInt(split[2]);
-                var arr = new Array(split.length - 3);
-                for (var i = 3; i < split.length; ++i)
-                    arr[i - 3] = map[parseInt(split[i])];
-                formDeck(x, y, arr, false);
-            } else if (split[0] == "identity") {
-                identity = parseInt(split[1]);
+        } else if (cmd == "rs") {
+            reportStatus();
+        } else if (cmd == "ss") {
+            for (var i = 1; i < split.length; i += 3) {
+                var card = map[(i - 1)/3];
+                card.locX = parseInt(split[i]);
+                card.locY = parseInt(split[i + 1]);
+                card.isUp = split[i + 2] == "1";
             }
+            redrawAll(false);
         }
+    }
+
+    // report the status of all objects in map
+    function reportStatus() {
+        var msg = "ss";
+        for (var card of map) {
+            msg += " " + card.locX + " " + card.locY + " " + (card.isUp ? 1 : 0);
+        }
+        socket.emit("msg", msg);
     }
 
     // Knuth-shuffle an array
