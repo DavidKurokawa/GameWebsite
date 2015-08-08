@@ -48,7 +48,7 @@ io.on("connection", function(socket) {
 });
 
 // listen for http connections
-http.listen(9090, function() {
-    console.log("listening on *:9090");
+http.listen(8080, function() {
+    console.log("listening on *:8080")
 });
 
