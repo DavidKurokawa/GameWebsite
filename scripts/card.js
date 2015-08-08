@@ -4,32 +4,33 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
     this.ctx = ctx;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
-    this.img = new Image();
-    this.img.width = 100;
-    this.img.height = 145;
-    this.img.locX = locX;
-    this.img.locY = locY;
-    this.img.frontSrc = "./imgs/" + card + ".png";
-    this.img.backSrc = "./imgs/back.jpg";
+    this.imgFront = new Image();
+    this.imgFront.src = "./imgs/" + card + ".png";
+    this.imgBack = new Image();
+    this.imgBack.src = "./imgs/back.jpg";
+    this.img = this.imgFront;
+    this.width = 100;
+    this.height = 145;
+    this.locX = locX;
+    this.locY = locY;
     this.isUp = true;
     this.isSelected = false;
     this.draggingOffsetX = 0;
     this.draggingOffsetY = 0;
-    this.img.src = this.img.frontSrc;
     this.socket = socket;
 
     // check if the card contains the given coordinates
     this.isXYInside = function(x, y) {
-        return this.img.locX < x && x < this.img.locX + this.img.width
-                && this.img.locY < y && y < this.img.locY + this.img.height;
+        return this.locX < x && x < this.locX + this.width
+                && this.locY < y && y < this.locY + this.height;
     }
     
     // check if the card were at the given coordinates would it still be on the canvas
     this.isInsideCanvas = function(x, y) {
         var cardX1 = x;
-        var cardX2 = x + this.img.width;
+        var cardX2 = x + this.width;
         var cardY1 = y;
-        var cardY2 = y + this.img.height;
+        var cardY2 = y + this.height;
         var canvasX1 = 0;
         var canvasX2 = canvasWidth;
         var canvasY1 = 0;
@@ -44,31 +45,31 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
         var rectX2 = Math.max(x1, x2);
         var rectY1 = Math.min(y1, y2);
         var rectY2 = Math.max(y1, y2);
-        var cardX1 = this.img.locX;
-        var cardX2 = this.img.locX + this.img.width;
-        var cardY1 = this.img.locY;
-        var cardY2 = this.img.locY + this.img.height;
+        var cardX1 = this.locX;
+        var cardX2 = this.locX + this.width;
+        var cardY1 = this.locY;
+        var cardY2 = this.locY + this.height;
         return rectX1 <= cardX1 && cardX2 <= rectX2
                 && rectY1 <= cardY1 && cardY2 <= rectY2;
     }
 
     // draw the card
     this.draw = function() {
-        this.ctx.drawImage(this.img, this.img.locX, this.img.locY, this.img.width, this.img.height);
+        this.ctx.drawImage(this.img, this.locX, this.locY, this.width, this.height);
         this.ctx.strokeStyle = this.isSelected ? "#FF0000" : "#000000";
-        this.ctx.strokeRect(this.img.locX, this.img.locY, this.img.width, this.img.height);
+        this.ctx.strokeRect(this.locX, this.locY, this.width, this.height);
     };
 
     // move the card
     this.move = function(x, y, report) {
         x = Math.max(x, 0);
-        x = Math.min(x, canvasWidth - this.img.width);
+        x = Math.min(x, canvasWidth - this.width);
         y = Math.max(y, 0);
-        y = Math.min(y, canvasHeight - this.img.height);
+        y = Math.min(y, canvasHeight - this.height);
         x = parseInt(x);
         y = parseInt(y);
-        this.img.locX = x;
-        this.img.locY = y;
+        this.locX = x;
+        this.locY = y;
         if (report) {
             this.socket.emit("msg", "mv " + this.id + " " + x + " " + y);
         }
@@ -77,8 +78,8 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
     // select the card
     this.select = function(x, y) {
         this.isSelected = true;
-        this.draggingOffsetX = x - this.img.locX;
-        this.draggingOffsetY = y - this.img.locY;
+        this.draggingOffsetX = x - this.locX;
+        this.draggingOffsetY = y - this.locY;
         this.draw();
     };
 
@@ -97,7 +98,7 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
     // flip the card
     this.flip = function(report) {
         this.isUp = !this.isUp;
-        this.img.src = this.isUp ? this.img.frontSrc : this.img.backSrc;
+        this.img = this.isUp ? this.imgFront : this.imgBack;
         if (report) {
             this.socket.emit("msg", "fl " + this.id);
         }

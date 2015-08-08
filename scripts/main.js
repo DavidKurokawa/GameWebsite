@@ -1,6 +1,8 @@
 // TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
 // TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
+// TODO: when someone joins, they just see a new deck and not the current state
+// TODO: there are some obvious issues with timing and the states can get a bit out of whack (not sure if this should be fixed?)
 
 // initialize
 function initialize() {
@@ -134,8 +136,8 @@ function initialize() {
         var job = setInterval(function() {
             var done = true;
             for (var card of cardsToMove) {
-                var cardX = card.img.locX;
-                var cardY = card.img.locY;
+                var cardX = card.locX;
+                var cardY = card.locY;
                 if (x != cardX || y != cardY) {
                     var dist = Math.sqrt((x - cardX)*(x - cardX) + (y - cardY)*(y - cardY));
                     var newX = x;
@@ -145,7 +147,7 @@ function initialize() {
                         newY = cardY + SPEED*(y - cardY)/dist;
                     }
                     card.move(newX, newY, false);
-                    done = done && cardX == card.img.locX && cardY == card.img.locY;
+                    done = done && cardX == card.locX && cardY == card.locY;
                 }
             }
             redrawAll(false);
@@ -209,8 +211,8 @@ function initialize() {
     function adjustRelativeLocations(x, y) {
         cards.foreach(function(card) {
             if (card.isSelected) {
-                card.draggingOffsetX = x - card.img.locX;
-                card.draggingOffsetY = y - card.img.locY;
+                card.draggingOffsetX = x - card.locX;
+                card.draggingOffsetY = y - card.locY;
             }
         });
     }
@@ -287,9 +289,6 @@ function initialize() {
 
     // handle mouse move events
     function handleMouseMove(e) {
-var offsetX2 = canvasOffset.left;
-var offsetY2 = canvasOffset.top;
-console.log("offset = " + offsetX2 + ", " + offsetY2);
         hasMouseMovedWhenDown = true;
         mouseX = e.clientX + document.body.scrollLeft - offsetX;
         mouseY = e.clientY + document.body.scrollTop - offsetY;
