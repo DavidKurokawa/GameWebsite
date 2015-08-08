@@ -1,7 +1,6 @@
 // TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
 // TODO: fix the bug where Card is not a subclass of Image and therefore we can't have the correct border when we double-click
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
-// TODO: the mouse doesn't work well when the screen is scrolled!
 
 // initialize
 function initialize() {
@@ -32,8 +31,8 @@ function initialize() {
     function fullDeck() {
         var ret = [];
         var x = 10;
-        for (suit of ["S", "H", "C", "D"]) {
-            for (rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
+        for (var suit of ["S", "H", "C", "D"]) {
+            for (var rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
                 ret.push(new Card(ctx, canvasWidth, canvasHeight, x, 10, rank + suit, socket));
                 x += 20;
             }
@@ -76,6 +75,13 @@ function initialize() {
             } else if (split[0] == "tt") {
                 var cardIdx = parseInt(split[1]);
                 moveCardToTop(map[cardIdx], false);
+            } else if (split[0] == "fd") {
+                var x = parseInt(split[1]);
+                var y = parseInt(split[2]);
+                var arr = new Array(split.length - 3);
+                for (var i = 3; i < split.length; ++i)
+                    arr[i - 3] = map[parseInt(split[i])];
+                formDeck(x, y, arr, false);
             } else if (split[0] == "identity") {
                 identity = parseInt(split[1]);
             }
@@ -116,20 +122,18 @@ function initialize() {
 
     // move given card to top (i.e. last to be drawn)
     function moveCardToTop(card, report) {
-console.log(card);
         cards.moveToTail(card.node);
         if (report) {
             socket.emit("msg", "tt " + card.id);
         }
     }
 
-    // move selected cards slowly to the given coordinates
-    function moveSelectedCardsSlowly(x, y) {
+    // move given cards slowly to the given coordinates
+    function moveCardsSlowly(x, y, cardsToMove) {
         var SPEED = 20;
-        var selected = getSelectedCards();
         var job = setInterval(function() {
             var done = true;
-            for (card of selected) {
+            for (var card of cardsToMove) {
                 var cardX = card.img.locX;
                 var cardY = card.img.locY;
                 if (x != cardX || y != cardY) {
@@ -140,22 +144,29 @@ console.log(card);
                         newX = cardX + SPEED*(x - cardX)/dist;
                         newY = cardY + SPEED*(y - cardY)/dist;
                     }
-                    card.move(newX, newY, true);
+                    card.move(newX, newY, false);
                     done = done && cardX == card.img.locX && cardY == card.img.locY;
                 }
             }
-            redrawAll(true);
+            redrawAll(false);
             if (done) {
                 clearInterval(job);
             }
         }, 1);
     }
 
-    // form a deck with the selected cards at the given coordinates
-    function formDeck(x, y) {
+    // form a deck with the given cards at the given coordinates
+    function formDeck(x, y, cardsToDeckify, report) {
         setTimeout(function() {
-            moveSelectedCardsSlowly(x, y);
+            moveCardsSlowly(x, y, cardsToDeckify);
         }, 0);
+        if (report) {
+            var msg = "fd " + x + " " + y;
+            for (var card of cardsToDeckify) {
+                msg += " " + card.id;
+            }
+            socket.emit("msg", msg);
+        }
     }
 
     // randomly reorder the level of the selected cards
@@ -215,17 +226,15 @@ console.log(card);
     function handleMouseDown(e) {
         hasMouseMovedWhenDown = false;
         isMouseDown = true;
-        var x = parseInt(e.clientX - offsetX);
-        var y = parseInt(e.clientY - offsetY);
-        var selected = getLookedAtCard(x, y);
+        var selected = getLookedAtCard(mouseX, mouseY);
         if (e.ctrlKey) {
-            adjustRelativeLocations(x, y);
+            adjustRelativeLocations(mouseX, mouseY);
             // if ctrl is down and the selected card is already selected: adjust all relative locations and unselect the card
             if (selected != null && selected.isSelected) {
                 selected.unselect();
             // if ctrl is down and the selected card is not already selected: adjust all relative locatiosn and select the card
             } else if (selected != null && !selected.isSelected) {
-                selected.select(x, y);
+                selected.select(mouseX, mouseY);
             }
         } else {
             // if ctrl is up and there is no selected card: unselect everything
@@ -233,12 +242,12 @@ console.log(card);
                 unselectAll();
             // if ctrl is up and the selected card is already selected: adjust all relative locations and reselect the card
             } else if (selected.isSelected) {
-                adjustRelativeLocations(x, y);
-                selected.select(x, y);
+                adjustRelativeLocations(mouseX, mouseY);
+                selected.select(mouseX, mouseY);
             // if ctrl is up and the selected card is not already selected: select that card and unselect everything else
             } else {
                 unselectAll();
-                selected.select(x, y);
+                selected.select(mouseX, mouseY);
             }
         }
         if (selected != null) {
@@ -247,8 +256,8 @@ console.log(card);
         // group selection
         if (selected == null) {
             isGroupSelecting = true;
-            groupSelectionX = x;
-            groupSelectionY = y;
+            groupSelectionX = mouseX;
+            groupSelectionY = mouseY;
         }
     }
 
@@ -264,12 +273,10 @@ console.log(card);
             redrawAll(false);
         }
         if (!e.ctrlKey && !hasMouseMovedWhenDown) {
-            var x = parseInt(mouseX - offsetX);
-            var y = parseInt(mouseY - offsetY);
             unselectAll();
-            var selected = getLookedAtCard(x, y);
+            var selected = getLookedAtCard(mouseX, mouseY);
             if (typeof selected !== 'undefined') {
-                selected.select(x, y);
+                selected.select(mouseX, mouseY);
             }
             redrawAll(true);
         }
@@ -280,16 +287,17 @@ console.log(card);
 
     // handle mouse move events
     function handleMouseMove(e) {
+var offsetX2 = canvasOffset.left;
+var offsetY2 = canvasOffset.top;
+console.log("offset = " + offsetX2 + ", " + offsetY2);
         hasMouseMovedWhenDown = true;
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        var x = parseInt(e.clientX - offsetX);
-        var y = parseInt(e.clientY - offsetY);
+        mouseX = e.clientX + document.body.scrollLeft - offsetX;
+        mouseY = e.clientY + document.body.scrollTop - offsetY;
         if (isMouseDown && !isGroupSelecting) {
             cards.foreach(function(card) {
                 if (card.isSelected) {
-                    var newX = x - card.draggingOffsetX;
-                    var newY = y - card.draggingOffsetY;
+                    var newX = mouseX - card.draggingOffsetX;
+                    var newY = mouseY - card.draggingOffsetY;
                     card.move(newX, newY, true);
                 }
             });
@@ -305,9 +313,7 @@ console.log(card);
 
     // handle mouse double click events
     function handleDoubleClick(e) {
-        var x = e.clientX;
-        var y = e.clientY;
-        var selected = getLookedAtCard(x, y);
+        var selected = getLookedAtCard(mouseX, mouseY);
         if (selected != null) {
             selected.flip(true);
             //selected.draw();
@@ -319,7 +325,7 @@ console.log(card);
     function handleKeyPress(e) {
         console.log("keycode = " + e.keyCode);
         if (e.keyCode == 0 || e.keyCode == 32) {
-            formDeck(mouseX, mouseY);
+            formDeck(mouseX, mouseY, getSelectedCards(), true);
         } else if (e.keyCode == 13) {
             reorderSelected();
         } else if (e.keyCode == 102) {

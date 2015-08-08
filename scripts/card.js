@@ -65,6 +65,8 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
         x = Math.min(x, canvasWidth - this.img.width);
         y = Math.max(y, 0);
         y = Math.min(y, canvasHeight - this.img.height);
+        x = parseInt(x);
+        y = parseInt(y);
         this.img.locX = x;
         this.img.locY = y;
         if (report) {
