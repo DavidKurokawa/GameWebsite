@@ -1,13 +1,13 @@
 // card to play with
-function Card(card, locX, locY) {
+function Card(frontSrc, backSrc, locX, locY, width, height) {
     // construct the card
     this.id;
     this.imgFront = new Image();
-    this.imgFront.src = "./imgs/" + card + ".png";
+    this.imgFront.src = frontSrc;
     this.imgBack = new Image();
-    this.imgBack.src = "./imgs/back.jpg";
-    this.width = 100;
-    this.height = 145;
+    this.imgBack.src = backSrc;
+    this.width = width;
+    this.height = height;
     this.locX = locX;
     this.locY = locY;
     this.isUpPublicly = true;
