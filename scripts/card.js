@@ -174,10 +174,10 @@ function Card(card, locX, locY) {
     // flip the card
     this.flip = function(report) {
         var isPrivate = this.isInsidePrivateArea();
+        var isPublic = this.isInsidePublicArea();
         if (isPrivate || !isPublic) {
             this.isUpPrivately = !this.isUpPrivately;
         }
-        var isPublic = this.isInsidePublicArea();
         if (isPublic || !isPrivate) {
             this.isUpPublicly = !this.isUpPublicly;
             if (report) {
