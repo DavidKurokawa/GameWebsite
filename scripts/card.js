@@ -13,6 +13,7 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
     this.isUpPublicly = true;
     this.isUpPrivately = true;
     this.isSelected = false;
+    this.isMovingSlowly = false;
     this.draggingOffsetX = 0;
     this.draggingOffsetY = 0;
 

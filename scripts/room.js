@@ -136,10 +136,17 @@ function Room(canvasId, cardMap) {
     // form a deck with the given cards at the given coordinates
     this.formDeck = function(x, y, cardsToDeckify, report) {
         var that = this;
-        setTimeout(that.moveCardsSlowly(x, y, cardsToDeckify), 0);
+        var cardsNotAlreadyDeckifying = [];
+        for (var card of cardsToDeckify) {
+            if (!card.isMovingSlowly) {
+                card.isMovingSlowly = true;
+                cardsNotAlreadyDeckifying.push(card);
+            }
+        }
+        setTimeout(that.moveCardsSlowly(x, y, cardsNotAlreadyDeckifying), 0);
         if (report) {
             var msg = "fd " + x + " " + y;
-            for (var card of cardsToDeckify) {
+            for (var card of cardsNotAlreadyDeckifying) {
                 msg += " " + card.id;
             }
             this.send(msg);
@@ -170,6 +177,9 @@ function Room(canvasId, cardMap) {
             that.redraw(false);
             if (done) {
                 clearInterval(job);
+                for (var card of cardsToMove) {
+                    card.isMovingSlowly = false;
+                }
             }
         }, 1);
     }
