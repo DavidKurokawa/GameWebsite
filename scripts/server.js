@@ -16,7 +16,7 @@ function setUpServer(room) {
             cardMap[cardIdx].move(x, y, false);
         } else if (cmd == "fl") {
             var cardIdx = parseInt(split[1]);
-            cardMap[cardIdx].flip(false);
+            cardMap[cardIdx].flip(true);
         } else if (cmd == "rd") {
             room.redraw(false);
         } else if (cmd == "tt") {

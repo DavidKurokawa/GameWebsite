@@ -172,15 +172,15 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
     }
 
     // flip the card
-    this.flip = function(report) {
+    this.flip = function(fromServer) {
         var isPrivate = this.isInsidePrivateArea();
         var isPublic = this.isInsidePublicArea();
         if (isPrivate || !isPublic) {
             this.isUpPrivately = !this.isUpPrivately;
         }
-        if (isPublic || !isPrivate) {
+        if (isPublic || !isPrivate || fromServer) {
             this.isUpPublicly = !this.isUpPublicly;
-            if (report) {
+            if (!fromServer) {
                 this.send("fl " + this.id);
             }
         }

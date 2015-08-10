@@ -87,7 +87,7 @@ function Room(canvasId, cardMap) {
     this.flipSelected = function() {
         this.cards.foreach(function(card) {
             if (card.isSelected) {
-                card.flip(true);
+                card.flip(false);
             }
         });
         this.redraw(true);

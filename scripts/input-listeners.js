@@ -119,7 +119,7 @@ function setUpInputListeners(room) {
     function handleDoubleClick(e) {
         var selected = room.getTopmostCardAt(mouseX, mouseY);
         if (selected != null) {
-            selected.flip(true);
+            selected.flip(false);
             //selected.draw();
             room.redraw(true); // TODO: perhaps I should use selected.draw() but then I have to send that to the server
         }
