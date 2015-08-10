@@ -1,4 +1,5 @@
 // setup
+var port = 8080;
 var express = require("express");
 var app = express();
 var http = require("http").Server(app);
@@ -48,7 +49,7 @@ io.on("connection", function(socket) {
 });
 
 // listen for http connections
-http.listen(8080, function() {
-    console.log("listening on *:8080")
+http.listen(port, function() {
+    console.log("listening on *:" + port)
 });
 

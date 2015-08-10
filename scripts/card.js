@@ -1,23 +1,29 @@
-function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
+// card to play with
+function Card(card, locX, locY) {
     // construct the card
     this.id;
-    this.ctx = ctx;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
     this.imgFront = new Image();
     this.imgFront.src = "./imgs/" + card + ".png";
     this.imgBack = new Image();
     this.imgBack.src = "./imgs/back.jpg";
-    this.img = this.imgFront;
     this.width = 100;
     this.height = 145;
     this.locX = locX;
     this.locY = locY;
-    this.isUp = true;
+    this.isUpPublicly = true;
+    this.isUpPrivately = true;
     this.isSelected = false;
     this.draggingOffsetX = 0;
     this.draggingOffsetY = 0;
-    this.socket = socket;
+
+    // set the room to use
+    this.setRoom = function(room) {
+        this.ctx = room.ctx;
+        this.roomWidth = room.width;
+        this.roomHeight = room.height;
+        this.privateArea = room.privateAreas[0]; // TODO: change this!
+        this.send = room.send;
+    }
 
     // check if the card contains the given coordinates
     this.isXYInside = function(x, y) {
@@ -32,9 +38,9 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
         var cardY1 = y;
         var cardY2 = y + this.height;
         var canvasX1 = 0;
-        var canvasX2 = canvasWidth;
+        var canvasX2 = this.roomWidth;
         var canvasY1 = 0;
-        var canvasY2 = canvasHeight;
+        var canvasY2 = this.roomHeight;
         return canvasX1 <= cardX1 && cardX2 <= canvasX2
                 && canvasY1 <= cardY1 && cardY2 <= canvasY2;
     }
@@ -53,25 +59,70 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
                 && rectY1 <= cardY1 && cardY2 <= rectY2;
     }
 
-    // draw the card
-    this.draw = function() {
-        this.ctx.drawImage(this.img, this.locX, this.locY, this.width, this.height);
+    // check if the card is inside the private area
+    this.isInsidePrivateArea = function() {
+        return this.isContainedIn(this.privateArea.x1,
+                                  this.privateArea.y1,
+                                  this.privateArea.x2,
+                                  this.privateArea.y2);
+    }
+
+    // check if the card is inside the public area
+    this.isInsidePublicArea = function() {
+        return this.locX >= this.privateArea.x2 || this.locY + this.height <= this.privateArea.y1;
+    }
+    
+    // draw the border of the card
+    this.drawBorder = function() {
         this.ctx.strokeStyle = this.isSelected ? "#FF0000" : "#000000";
         this.ctx.strokeRect(this.locX, this.locY, this.width, this.height);
+    }
+
+    // draw the card
+    this.draw = function() {
+        var x = this.locX;
+        var y = this.locY;
+        var w = this.width;
+        var h = this.height;
+        var isPrivate = this.isInsidePrivateArea();
+        var isPublic = this.isInsidePublicArea();
+        if (this.isUpPrivately == this.isUpPublicly || isPrivate || isPublic) {
+            var isUp = isPrivate ? this.isUpPrivately : this.isUpPublicly;
+            var img = isUp ? this.imgFront : this.imgBack;
+            this.ctx.drawImage(img, x, y, w, h);
+        } else {
+            var imgPublic = this.isUpPublicly ? this.imgFront : this.imgBack;
+            this.ctx.drawImage(imgPublic, this.locX, this.locY, this.width, this.height);
+            var imgPrivate = this.isUpPrivately ? this.imgFront : this.imgBack;
+            var croppedX = 0;
+            var croppedY = y >= this.privateArea.y1 ? 0 : (this.privateArea.y1 - y);
+            var croppedWidth = x + w <= this.privateArea.x2 ? w : (this.privateArea.x2 - x);
+            var croppedHeight = h - croppedY;
+            this.ctx.drawImage(imgPrivate,
+                               croppedX,
+                               croppedY,
+                               croppedWidth,
+                               croppedHeight,
+                               x + croppedX,
+                               y + croppedY,
+                               croppedWidth,
+                               croppedHeight);
+        }
+        this.drawBorder();
     };
 
     // move the card
     this.move = function(x, y, report) {
         x = Math.max(x, 0);
-        x = Math.min(x, canvasWidth - this.width);
+        x = Math.min(x, this.roomWidth - this.width);
         y = Math.max(y, 0);
-        y = Math.min(y, canvasHeight - this.height);
+        y = Math.min(y, this.roomHeight - this.height);
         x = parseInt(x);
         y = parseInt(y);
         this.locX = x;
         this.locY = y;
         if (report) {
-            this.socket.emit("msg", "mv " + this.id + " " + x + " " + y);
+            this.send("mv " + this.id + " " + x + " " + y);
         }
     }
 
@@ -97,10 +148,16 @@ function Card(ctx, canvasWidth, canvasHeight, locX, locY, card, socket) {
 
     // flip the card
     this.flip = function(report) {
-        this.isUp = !this.isUp;
-        this.img = this.isUp ? this.imgFront : this.imgBack;
-        if (report) {
-            this.socket.emit("msg", "fl " + this.id);
+        var isPrivate = this.isInsidePrivateArea();
+        if (isPrivate || !isPublic) {
+            this.isUpPrivately = !this.isUpPrivately;
+        }
+        var isPublic = this.isInsidePublicArea();
+        if (isPublic || !isPrivate) {
+            this.isUpPublicly = !this.isUpPublicly;
+            if (report) {
+                this.send("fl " + this.id);
+            }
         }
     }
 }

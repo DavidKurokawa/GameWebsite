@@ -1,5 +1,6 @@
+// doubly linked list
 function DoublyLinkedList(arr) {
-    // transform array to doubly linked list
+    // constructor: transform array to doubly linked list
     this.head = new Node();
     this.tail = new Node();
     var prev = this.head;
@@ -54,7 +55,7 @@ function DoublyLinkedList(arr) {
     }
 }
 
-// Node for doubly linked list
+// node for doubly linked list
 function Node() {
     this.prev;
     this.val;
