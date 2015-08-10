@@ -36,12 +36,16 @@ function setUpServer(room) {
         } else if (cmd == "rs") {
             reportStatus();
         } else if (cmd == "ss") {
-            for (var i = 1; i < split.length; i += 3) {
-                var card = cardMap[(i - 1)/3];
-                card.locX = parseInt(split[i]);
-                card.locY = parseInt(split[i + 1]);
-                card.isUpPublicly = split[i + 2] == "1";
+            var newCards = new Array(cardMap.length);
+            for (var i = 1; i < split.length; i += 4) {
+                var cardId = parseInt(split[i]);
+                var card = cardMap[cardId];
+                card.locX = parseInt(split[i + 1]);
+                card.locY = parseInt(split[i + 2]);
+                card.isUpPublicly = split[i + 3] == "1";
+                newCards[(i - 1)/4] = card;
             }
+            room.cards = new DoublyLinkedList(newCards);
             room.redraw(false);
         } else if (cmd == "id") {
             room.id = parseInt(split[1]);
@@ -51,11 +55,12 @@ function setUpServer(room) {
     // report the status of all cards
     function reportStatus() {
         var msg = "ss";
-        for (var card of cardMap) {
-            msg += " " + card.locX
+        room.cards.foreach(function(card) {
+            msg += " " + card.id
+                 + " " + card.locX
                  + " " + card.locY
                  + " " + (card.isUpPublicly ? 1 : 0);
-        }
+        });
         send(msg);
     }
 

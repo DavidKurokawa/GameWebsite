@@ -17,6 +17,10 @@ function Room(canvasId, cardMap) {
     ];
     this.cards = new DoublyLinkedList(cardMap);
     // TODO: this is pretty hacky!
+    // we do this waiting for a few purposes:
+    // 1. we need to get the state from another connection if there are others
+    // 2. the images need to be downloaded from the server
+    // 3. we need to know the id of the room to determine the private area
     this.initialized = false;
     var that = this;
     setTimeout(function() {
@@ -36,12 +40,17 @@ function Room(canvasId, cardMap) {
             this.cards.foreach(function(card) {
                 card.draw();
             });
-            for (var curr of this.privateAreas) {
-                curr.draw();
-            }
+            this.redrawPrivateAreas();
             if (report) {
                 this.send("rd");
             }
+        }
+    }
+
+    // redraw the private areas
+    this.redrawPrivateAreas = function() {
+        for (var curr of this.privateAreas) {
+            curr.draw();
         }
     }
 
@@ -94,15 +103,22 @@ function Room(canvasId, cardMap) {
 
     // randomly reorder the level of the selected cards
     this.reorderSelected = function() {
-        var selected = [];
-        this.cards.foreach(function(card) {
-            if (card.isSelected) {
-                selected.push(card);
-            }
-        });
-        this.shuffle(selected);
-        for (var card of selected) {
-            this.moveCardToTop(card, true);
+        var selected = this.getSelectedCards();
+        // TODO: probably should do this in a more OOP way!
+        var n = selected.length;
+        var xs = new Array(n);
+        var ys = new Array(n);
+        var perm = new Array(n);
+        for (var i = 0; i < n; ++i) {
+            xs[i] = selected[i].locX;
+            ys[i] = selected[i].locY;
+            perm[i] = i;
+        }
+        this.shuffle(perm);
+        for (var i = 0; i < n; ++i) {
+            var j = perm[i];
+            selected[j].move(xs[i], ys[i], true);
+            this.moveCardToTop(selected[j], true);
         }
         this.redraw(true);
     }

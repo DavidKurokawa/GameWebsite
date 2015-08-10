@@ -18,6 +18,7 @@ function Card(card, locX, locY) {
 
     // set the room to use
     this.setRoom = function(room, privateArea) {
+        this.room = room;
         this.ctx = room.ctx;
         this.roomWidth = room.width;
         this.roomHeight = room.height;
@@ -132,6 +133,7 @@ function Card(card, locX, locY) {
                                croppedHeight);
         }
         this.drawBorder();
+        this.room.redrawPrivateAreas();
     };
 
     // move the card
