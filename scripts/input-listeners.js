@@ -69,7 +69,11 @@ function setUpInputListeners(room) {
         // check group selection
         if (isGroupSelecting) {
             room.cards.foreach(function(card) {
-                if (card.isContainedIn(groupSelectionX, groupSelectionY, mouseX, mouseY)) {
+                var rectX1 = Math.min(groupSelectionX, mouseX);
+                var rectY1 = Math.min(groupSelectionY, mouseY);
+                var rectX2 = Math.max(groupSelectionX, mouseX);
+                var rectY2 = Math.max(groupSelectionY, mouseY);
+                if (card.isContainedIn(rectX1, rectY1, rectX2, rectY2)) {
                     card.toggleSelected();
                 }
             });

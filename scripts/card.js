@@ -17,46 +17,56 @@ function Card(card, locX, locY) {
     this.draggingOffsetY = 0;
 
     // set the room to use
-    this.setRoom = function(room) {
+    this.setRoom = function(room, privateArea) {
         this.ctx = room.ctx;
         this.roomWidth = room.width;
         this.roomHeight = room.height;
-        this.privateArea = room.privateAreas[0]; // TODO: change this!
+        this.privateArea = privateArea;
         this.send = room.send;
+    }
+
+    // check if the given point is inside the given rectangle
+    this.isXYInsideRectangle = function(x, y, rectX1, rectY1, rectX2, rectY2) {
+        return rectX1 <= x && x <= rectX2 && rectY1 <= y && y <= rectY2;
+    }
+
+    // check if the first given rectangle is in the second given rectangle
+    this.isRectangleInsideRectangle = function(inX1, inY1, inX2, inY2, outX1, outY1, outX2, outY2) {
+        return outX1 <= inX1 && inX2 <= outX2 && outY1 <= inY1 && inY2 <= outY2;
     }
 
     // check if the card contains the given coordinates
     this.isXYInside = function(x, y) {
-        return this.locX < x && x < this.locX + this.width
-                && this.locY < y && y < this.locY + this.height;
+        return this.isXYInsideRectangle(x,
+                                        y,
+                                        this.locX,
+                                        this.locY,
+                                        this.locX + this.width,
+                                        this.locY + this.height);
     }
     
     // check if the card were at the given coordinates would it still be on the canvas
     this.isInsideCanvas = function(x, y) {
-        var cardX1 = x;
-        var cardX2 = x + this.width;
-        var cardY1 = y;
-        var cardY2 = y + this.height;
-        var canvasX1 = 0;
-        var canvasX2 = this.roomWidth;
-        var canvasY1 = 0;
-        var canvasY2 = this.roomHeight;
-        return canvasX1 <= cardX1 && cardX2 <= canvasX2
-                && canvasY1 <= cardY1 && cardY2 <= canvasY2;
+        return this.isRectangleInsideRectangle(x,
+                                               y,
+                                               x + this.width,
+                                               y + this.height,
+                                               0,
+                                               0,
+                                               this.roomWidth,
+                                               this.roomHeight);
     }
 
     // check if the card is contained in the given rectangle
     this.isContainedIn = function(x1, y1, x2, y2) {
-        var rectX1 = Math.min(x1, x2);
-        var rectX2 = Math.max(x1, x2);
-        var rectY1 = Math.min(y1, y2);
-        var rectY2 = Math.max(y1, y2);
-        var cardX1 = this.locX;
-        var cardX2 = this.locX + this.width;
-        var cardY1 = this.locY;
-        var cardY2 = this.locY + this.height;
-        return rectX1 <= cardX1 && cardX2 <= rectX2
-                && rectY1 <= cardY1 && cardY2 <= rectY2;
+        return this.isRectangleInsideRectangle(this.locX,
+                                               this.locY,
+                                               this.locX + this.width,
+                                               this.locY + this.height,
+                                               x1,
+                                               y1,
+                                               x2,
+                                               y2);
     }
 
     // check if the card is inside the private area
@@ -69,7 +79,20 @@ function Card(card, locX, locY) {
 
     // check if the card is inside the public area
     this.isInsidePublicArea = function() {
-        return this.locX >= this.privateArea.x2 || this.locY + this.height <= this.privateArea.y1;
+        // this checks that the card is inside the public area by checking the corners of the card
+        // if the card is large enough (or the private area small enough), this may not work
+        var x = this.locX;
+        var y = this.locY;
+        var w = this.width;
+        var h = this.height;
+        var x1 = this.privateArea.x1;
+        var y1 = this.privateArea.y1;
+        var x2 = this.privateArea.x2;
+        var y2 = this.privateArea.y2;
+        return !this.isXYInsideRectangle(x, y, x1, y1, x2, y2)
+               && !this.isXYInsideRectangle(x + w, y, x1, y1, x2, y2)
+               && !this.isXYInsideRectangle(x + w, y + h, x1, y1, x2, y2)
+               && !this.isXYInsideRectangle(x, y + h, x1, y1, x2, y2);
     }
     
     // draw the border of the card
@@ -92,9 +115,9 @@ function Card(card, locX, locY) {
             this.ctx.drawImage(img, x, y, w, h);
         } else {
             var imgPublic = this.isUpPublicly ? this.imgFront : this.imgBack;
-            this.ctx.drawImage(imgPublic, this.locX, this.locY, this.width, this.height);
+            this.ctx.drawImage(imgPublic, x, y, w, h);
             var imgPrivate = this.isUpPrivately ? this.imgFront : this.imgBack;
-            var croppedX = 0;
+            var croppedX = x >= this.privateArea.x1 ? 0 : (this.privateArea.x1 - x);
             var croppedY = y >= this.privateArea.y1 ? 0 : (this.privateArea.y1 - y);
             var croppedWidth = x + w <= this.privateArea.x2 ? w : (this.privateArea.x2 - x);
             var croppedHeight = h - croppedY;

@@ -1,6 +1,7 @@
 // game room
 function Room(canvasId, cardMap) {
     // constructor
+    this.id;
     var canvas = document.getElementById(canvasId);
     this.ctx = canvas.getContext("2d");
     var offset = $("#" + canvasId).offset();
@@ -14,23 +15,33 @@ function Room(canvasId, cardMap) {
         new PrivateArea(this.ctx, 0, this.height/2, this.width/2, this.height),
         new PrivateArea(this.ctx, this.width/2, this.height/2, this.width, this.height),
     ];
-    for (var card of cardMap) {
-        card.setRoom(this);
-    }
     this.cards = new DoublyLinkedList(cardMap);
-    setUpInputListeners(this);
+    // TODO: this is pretty hacky!
+    this.initialized = false;
+    var that = this;
+    setTimeout(function() {
+        that.privateArea = that.privateAreas[that.id%2]; // TODO: this obviously needs to be fixed!
+        for (var card of that.cardMap) {
+            card.setRoom(that, that.privateArea);
+        }
+        that.initialized = true;
+        that.redraw(false);
+        setUpInputListeners(that);
+    }, 2000);
 
     // redraw the room
     this.redraw = function(report) {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.cards.foreach(function(card) {
-            card.draw();
-        });
-        for (var privateArea of this.privateAreas) {
-            privateArea.draw();
-        }
-        if (report) {
-            this.send("rd");
+        if (this.initialized) {
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            this.cards.foreach(function(card) {
+                card.draw();
+            });
+            for (var curr of this.privateAreas) {
+                curr.draw();
+            }
+            if (report) {
+                this.send("rd");
+            }
         }
     }
 

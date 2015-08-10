@@ -33,6 +33,7 @@ function requestStatusReport() {
 // connection handler
 io.on("connection", function(socket) {
     // handle a connection
+    emit(socket, "id " + sockets.length);
     emit(socket.broadcast, "u+");
     requestStatusReport();
     sockets.push(socket);

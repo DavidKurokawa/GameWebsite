@@ -2,6 +2,9 @@
 // TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
 // TODO: there are some obvious issues with timing and the states can get a bit out of whack (not sure if this should be fixed?)
 // TODO: fix that the card.select/unselect/toggleSelected functions don't redraw the private area
+// TODO: maybe make it so that the private areas can shut off some of their doors?
+// TODO: maybe reimplement shuffling so that when you have a bunch of cards, they trade locations but retain the depths at the other location --- that way when we shuffle a deck it makes more sense
+// TODO: in general, it's annoying that you can be looking at some cards, and then if you click on one it covers everything behind it
 
 // initialize
 function initialize() {
@@ -24,6 +27,4 @@ function initialize() {
 
     // start room
     var room = new Room("canvas", cardMap);
-    // TODO: this is pretty hacky!
-    setTimeout(function() { room.redraw(false); }, 2000);
 }

@@ -43,6 +43,8 @@ function setUpServer(room) {
                 card.isUpPublicly = split[i + 2] == "1";
             }
             room.redraw(false);
+        } else if (cmd == "id") {
+            room.id = parseInt(split[1]);
         }
     }
 
