@@ -95,7 +95,7 @@ function Room(canvasId, cardMap) {
     // redraw the private areas
     this.redrawPrivateAreas = function() {
         for (var curr of this.privateAreas) {
-            curr.draw(curr == this.privateArea);
+            curr.draw();
         }
     }
 

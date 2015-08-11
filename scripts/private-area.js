@@ -33,13 +33,13 @@ function PrivateArea(id, room, x1, y1, x2, y2, claimX1, claimY1, claimX2, claimY
     this.claim = function(color) {
         this.color = color;
         // TODO: maybe make it more gradual?
-        this.room.redraw();
+        this.room.redraw(false);
     }
 
     // unclaim the private area
     this.unclaim = function() {
         delete this.color;
-        this.room.redraw();
+        this.room.redraw(false);
     }
 
     // draw the private area

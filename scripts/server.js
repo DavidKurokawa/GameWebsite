@@ -58,14 +58,16 @@ function setUpServer(room) {
         } else if (cmd == "cp") {
             var privateArea = room.privateAreas[parseInt(split[1])];
             var color = split[2];
-            privateArea.claim(color);
             if (color == room.color) {
                 room.privateArea = privateArea;
             }
+            privateArea.claim(color);
         } else if (cmd == "up") {
             var privateArea = room.privateAreas[parseInt(split[1])];
+            if (privateArea.isMine()) {
+                delete room.privateArea;
+            }
             privateArea.unclaim();
-            room.redraw(false);
         } else if (cmd == "id") {
             room.color = split[1];
         }
