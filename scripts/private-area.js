@@ -24,6 +24,11 @@ function PrivateArea(id, room, x1, y1, x2, y2, claimX1, claimY1, claimX2, claimY
         return typeof this.color !== "undefined";
     }
 
+    // check if the given coordinates are in the private area
+    this.isXYInside = function(x, y) {
+        return this.x1 <= x && x <= this.x2 && this.y1 <= y && y <= this.y2;
+    }
+
     // check if the given coordinates are over the private area's claim area
     this.isXYInsideClaimArea = function(x, y) {
         return this.claimX1 <= x && x <= this.claimX2 && this.claimY1 <= y && y <= this.claimY2;

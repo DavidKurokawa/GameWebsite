@@ -9,6 +9,7 @@ function setUpInputListeners(room) {
     var mouseY;
     var isMouseDown = false;
     var hasMouseMovedWhenDown;
+    room.canvas.oncontextmenu = function() { return false; };
     $(document).mousedown(function(e) { handleMouseDown(e); });
     $(document).mousemove(function(e) { handleMouseMove(e); });
     $(document).mouseup(function(e) { handleMouseUp(e); });
@@ -25,8 +26,8 @@ function setUpInputListeners(room) {
         });
     }
 
-    // handle mouse down events
-    function handleMouseDown(e) {
+    // handle left mouse button down events
+    function handleLeftMouseButtonDown(e) {
         isMouseDown = true;
         hasMouseMovedWhenDown = false;
         var selected = room.getTopmostCardAt(mouseX, mouseY);
@@ -64,8 +65,29 @@ function setUpInputListeners(room) {
         }
     }
 
-    // handle mouse up events
-    function handleMouseUp(e) {
+    // handle right mouse button down events
+    function handleRightMouseButtonDown(e) {
+        var card = room.getTopmostCardAt(mouseX, mouseY);
+        if (card != null) {
+            var img = card.isUpPublicly ? card.imgEnlargedFront : card.imgEnlargedBack;
+            if (typeof room.privateArea !== "undefined" && room.privateArea.isXYInside(mouseX, mouseY)) {
+                img = card.isUpPrivately ? card.imgEnlargedFront : card.imgEnlargedBack;
+            }
+            room.display(img);
+        }
+    }
+
+    // handle mouse down events
+    function handleMouseDown(e) {
+        if (e.button == 0) {
+            handleLeftMouseButtonDown(e);
+        } else if (e.button == 2) {
+            handleRightMouseButtonDown(e);
+        }
+    }
+
+    // handle left mouse button up events
+    function handleLeftMouseButtonUp(e) {
         // check group selection
         if (isGroupSelecting) {
             room.cards.foreach(function(card) {
@@ -90,6 +112,20 @@ function setUpInputListeners(room) {
         // clean up
         isMouseDown = false;
         isGroupSelecting = false;
+    }
+
+    // handle right mouse button up events
+    function handleRightMouseButtonUp() {
+        room.undisplay();
+    }
+
+    // handle mouse up events
+    function handleMouseUp(e) {
+        if (e.button == 0) {
+            handleLeftMouseButtonUp(e);
+        } else if (e.button == 2) {
+            handleRightMouseButtonUp(e);
+        }
     }
 
     // handle mouse move events

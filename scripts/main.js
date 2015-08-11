@@ -27,7 +27,9 @@ function initializeStandard() {
     for (var suit of ["S", "H", "C", "D"]) {
         for (var rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
             ret.push(new Card("./imgs/standard/" + rank + suit + ".png",
+                              "./imgs/standard/big_" + rank + suit + ".png",
                               "./imgs/standard/back.jpg",
+                              "./imgs/standard/big_back.jpg",
                               x,
                               10,
                               100,
@@ -60,7 +62,9 @@ function initializeSushiGo() {
         if (types.hasOwnProperty(type)) {
             for (var i = 0; i < types[type]; ++i) {
                 ret.push(new Card("./imgs/sushi_go/" + type + ".png",
+                                  "./imgs/sushi_go/big_" + type + ".png",
                                   "./imgs/sushi_go/back.png",
+                                  "./imgs/sushi_go/big_back.png",
                                   x,
                                   y,
                                   100,

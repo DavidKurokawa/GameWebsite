@@ -52,6 +52,7 @@ function Room(canvasId, cardMap) {
                         this.height)
     ];
     this.cards = new DoublyLinkedList(cardMap);
+    this.displayed;
     // TODO: this is pretty hacky!
     // we do this waiting for a few purposes:
     // 1. we need to get the state from another connection if there are others
@@ -88,6 +89,15 @@ function Room(canvasId, cardMap) {
             this.redrawPrivateAreas();
             if (report) {
                 this.send("rd");
+            }
+            if (typeof this.displayed !== "undefined") {
+                var factor = Math.min(this.width/this.displayed.width,
+                                      this.height/this.displayed.height);
+                var w = factor*this.displayed.width;
+                var h = factor*this.displayed.height;
+                var x = (this.width - w)/2;
+                var y = (this.height - h)/2;
+                this.ctx.drawImage(this.displayed, x, y, w, h);
             }
         }
     }
@@ -236,5 +246,15 @@ function Room(canvasId, cardMap) {
                 }
             }
         }, 1);
+    }
+
+    this.display = function(img) {
+        this.displayed = img;
+        this.redraw();
+    }
+
+    this.undisplay = function() {
+        delete this.displayed;
+        this.redraw();
     }
 }

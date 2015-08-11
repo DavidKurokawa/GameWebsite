@@ -1,11 +1,15 @@
 // card to play with
-function Card(frontSrc, backSrc, locX, locY, width, height) {
+function Card(frontSrc, enlargedFrontSrc, backSrc, enlargedBackSrc, locX, locY, width, height) {
     // construct the card
     this.id;
     this.imgFront = new Image();
     this.imgFront.src = frontSrc;
+    this.imgEnlargedFront = new Image();
+    this.imgEnlargedFront.src = enlargedFrontSrc;
     this.imgBack = new Image();
     this.imgBack.src = backSrc;
+    this.imgEnlargedBack = new Image();
+    this.imgEnlargedBack.src = enlargedBackSrc;
     this.width = width;
     this.height = height;
     this.locX = locX;
