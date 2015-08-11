@@ -17,20 +17,20 @@ body {
     right: 0;
     top: 0;
     bottom: 0;
-    height: 160px;
+    height: 472px;
 }
 
 #standard-button, #sushi-go-button {
-    background-size: 100px 156px;
-    height: 160px;  
-    width: 104px;
+    background-size: 300px 468px;
+    height: 472px;
+    width: 304px;
 }
 
 #standard-button {
-    background-image: url("../imgs/standard/back.jpg");
+    background-image: url("../imgs/standard/big_back.jpg");
 }
 
 #sushi-go-button {
-    background-image: url("../imgs/sushi_go/back.png");
+    background-image: url("../imgs/sushi_go/big_back.png");
 }
 
