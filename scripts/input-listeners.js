@@ -128,9 +128,9 @@ function setUpInputListeners(room) {
     // handle key press events
     function handleKeyPress(e) {
         console.log("keycode = " + e.keyCode);
-        if (e.keyCode == 0 || e.keyCode == 32) {
+        if (e.keyCode == 100) {
             room.formDeck(mouseX, mouseY, room.getSelectedCards(), true);
-        } else if (e.keyCode == 13) {
+        } else if (e.keyCode == 115) {
             room.reorderSelected();
         } else if (e.keyCode == 102) {
             room.flipSelected();
