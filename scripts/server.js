@@ -36,25 +36,47 @@ function setUpServer(room) {
         } else if (cmd == "rs") {
             reportStatus();
         } else if (cmd == "ss") {
+            for (var i = 1; i <= room.privateAreas.length; ++i) {
+                if (split[i] == "#") {
+                    room.privateAreas[i - 1].unclaim();
+                } else {
+                    room.privateAreas[i - 1].claim(split[i]);
+                }
+            }
             var newCards = new Array(cardMap.length);
-            for (var i = 1; i < split.length; i += 4) {
+            var offset = 1 + room.privateAreas.length;
+            for (var i = offset; i < split.length; i += 4) {
                 var cardId = parseInt(split[i]);
                 var card = cardMap[cardId];
                 card.locX = parseInt(split[i + 1]);
                 card.locY = parseInt(split[i + 2]);
                 card.isUpPublicly = split[i + 3] == "1";
-                newCards[(i - 1)/4] = card;
+                newCards[(i - offset)/4] = card;
             }
             room.cards = new DoublyLinkedList(newCards);
             room.redraw(false);
+        } else if (cmd == "cp") {
+            var privateArea = room.privateAreas[parseInt(split[1])];
+            var color = split[2];
+            privateArea.claim(color);
+            if (color == room.color) {
+                room.privateArea = privateArea;
+            }
+        } else if (cmd == "up") {
+            var privateArea = room.privateAreas[parseInt(split[1])];
+            privateArea.unclaim();
+            room.redraw(false);
         } else if (cmd == "id") {
-            room.id = parseInt(split[1]);
+            room.color = split[1];
         }
     }
 
     // report the status of all cards
     function reportStatus() {
         var msg = "ss";
+        for (var privateArea of room.privateAreas) {
+            msg += " " + (privateArea.isClaimed() ? privateArea.color : "#");
+        }
         room.cards.foreach(function(card) {
             msg += " " + card.id
                  + " " + card.locX

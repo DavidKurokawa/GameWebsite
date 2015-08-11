@@ -18,12 +18,11 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
     this.draggingOffsetY = 0;
 
     // set the room to use
-    this.setRoom = function(room, privateArea) {
+    this.setRoom = function(room) {
         this.room = room;
         this.ctx = room.ctx;
         this.roomWidth = room.width;
         this.roomHeight = room.height;
-        this.privateArea = privateArea;
         this.send = room.send;
     }
 
@@ -73,24 +72,28 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
 
     // check if the card is inside the private area
     this.isInsidePrivateArea = function() {
-        return this.isContainedIn(this.privateArea.x1,
-                                  this.privateArea.y1,
-                                  this.privateArea.x2,
-                                  this.privateArea.y2);
+        return typeof this.room.privateArea !== "undefined"
+                && this.isContainedIn(this.room.privateArea.x1,
+                                      this.room.privateArea.y1,
+                                      this.room.privateArea.x2,
+                                      this.room.privateArea.y2);
     }
 
     // check if the card is inside the public area
     this.isInsidePublicArea = function() {
         // this checks that the card is inside the public area by checking the corners of the card
         // if the card is large enough (or the private area small enough), this may not work
+        if (typeof this.room.privateArea === "undefined") {
+            return true;
+        }
         var x = this.locX;
         var y = this.locY;
         var w = this.width;
         var h = this.height;
-        var x1 = this.privateArea.x1;
-        var y1 = this.privateArea.y1;
-        var x2 = this.privateArea.x2;
-        var y2 = this.privateArea.y2;
+        var x1 = this.room.privateArea.x1;
+        var y1 = this.room.privateArea.y1;
+        var x2 = this.room.privateArea.x2;
+        var y2 = this.room.privateArea.y2;
         return !this.isXYInsideRectangle(x, y, x1, y1, x2, y2)
                && !this.isXYInsideRectangle(x + w, y, x1, y1, x2, y2)
                && !this.isXYInsideRectangle(x + w, y + h, x1, y1, x2, y2)
@@ -119,9 +122,9 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
             var imgPublic = this.isUpPublicly ? this.imgFront : this.imgBack;
             this.ctx.drawImage(imgPublic, x, y, w, h);
             var imgPrivate = this.isUpPrivately ? this.imgFront : this.imgBack;
-            var croppedX = x >= this.privateArea.x1 ? 0 : (this.privateArea.x1 - x);
-            var croppedY = y >= this.privateArea.y1 ? 0 : (this.privateArea.y1 - y);
-            var croppedWidth = x + w <= this.privateArea.x2 ? w : (this.privateArea.x2 - x);
+            var croppedX = x >= this.room.privateArea.x1 ? 0 : (this.room.privateArea.x1 - x);
+            var croppedY = y >= this.room.privateArea.y1 ? 0 : (this.room.privateArea.y1 - y);
+            var croppedWidth = x + w <= this.room.privateArea.x2 ? w : (this.room.privateArea.x2 - x);
             var croppedHeight = h - croppedY;
             this.ctx.drawImage(imgPrivate,
                                croppedX,

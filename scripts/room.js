@@ -1,7 +1,7 @@
 // game room
 function Room(canvasId, cardMap) {
     // constructor
-    this.id;
+    this.color;
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
     this.width = this.canvas.width;
@@ -9,8 +9,26 @@ function Room(canvasId, cardMap) {
     this.cardMap = cardMap;
     this.send = setUpServer(this);
     this.privateAreas = [
-        new PrivateArea(this.ctx, 0, this.height/2, this.width/2, this.height),
-        new PrivateArea(this.ctx, this.width/2, this.height/2, this.width, this.height),
+        new PrivateArea(0,
+                        this,
+                        0,
+                        this.height/2,
+                        this.width/2,
+                        this.height,
+                        0,
+                        this.height - 15,
+                        15,
+                        this.height),
+        new PrivateArea(1,
+                        this,
+                        this.width/2,
+                        this.height/2,
+                        this.width,
+                        this.height,
+                        this.width - 15,
+                        this.height - 15,
+                        this.width,
+                        this.height)
     ];
     this.cards = new DoublyLinkedList(cardMap);
     // TODO: this is pretty hacky!
@@ -21,7 +39,6 @@ function Room(canvasId, cardMap) {
     this.initialized = false;
     var that = this;
     setTimeout(function() {
-        that.privateArea = that.privateAreas[that.id%2]; // TODO: this obviously needs to be fixed!
         for (var card of that.cardMap) {
             card.setRoom(that, that.privateArea);
         }
@@ -70,6 +87,15 @@ function Room(canvasId, cardMap) {
             }
         });
         return ret;
+    }
+
+    // get the private area associated with the claim area the mouse is currently over (if any)
+    this.getPrivateAreaClaimAreaAt = function(x, y) {
+        for (var privateArea of this.privateAreas) {
+            if (privateArea.isXYInsideClaimArea(x, y)) {
+                return privateArea;
+            }
+        }
     }
 
     // get all selected cards

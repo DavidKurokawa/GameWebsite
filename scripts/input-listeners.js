@@ -82,7 +82,7 @@ function setUpInputListeners(room) {
         if (!e.ctrlKey && !hasMouseMovedWhenDown) {
             room.unselectAll();
             var selected = room.getTopmostCardAt(mouseX, mouseY);
-            if (typeof selected !== 'undefined') {
+            if (typeof selected !== "undefined") {
                 selected.select(mouseX, mouseY);
             }
             room.redraw(true);
@@ -111,17 +111,30 @@ function setUpInputListeners(room) {
         }
         if (isGroupSelecting) {
             room.ctx.strokeStyle = "#FF0000";
-            room.ctx.strokeRect(groupSelectionX, groupSelectionY, mouseX - groupSelectionX, mouseY - groupSelectionY);
+            room.ctx.strokeRect(groupSelectionX,
+                                groupSelectionY,
+                                mouseX - groupSelectionX,
+                                mouseY - groupSelectionY);
         }
     }
 
     // handle mouse double click events
     function handleDoubleClick(e) {
-        var selected = room.getTopmostCardAt(mouseX, mouseY);
-        if (selected != null) {
-            selected.flip(false);
-            //selected.draw();
-            room.redraw(true); // TODO: perhaps I should use selected.draw() but then I have to send that to the server
+        var privateArea = room.getPrivateAreaClaimAreaAt(mouseX, mouseY);
+        if (typeof privateArea !== "undefined") {
+            // claim/unclaim any private areas if applicable
+            if (!privateArea.isClaimed()) {
+                room.send("rp " + privateArea.id);
+            } else if (privateArea.isMine()) {
+                room.send("up");
+            }
+        } else {
+            // flip over the topmost card the mouse is over
+            var selected = room.getTopmostCardAt(mouseX, mouseY);
+            if (selected != null) {
+                selected.flip(false);
+                room.redraw(true);
+            }
         }
     }
 
