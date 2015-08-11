@@ -95,8 +95,8 @@ function setUpInputListeners(room) {
     // handle mouse move events
     function handleMouseMove(e) {
         hasMouseMovedWhenDown = true;
-        mouseX = e.clientX + document.body.scrollLeft - room.offsetX;
-        mouseY = e.clientY + document.body.scrollTop - room.offsetY;
+        mouseX = e.clientX + document.body.scrollLeft - room.offsetX();
+        mouseY = e.clientY + document.body.scrollTop - room.offsetY();
         if (isMouseDown && !isGroupSelecting) {
             room.cards.foreach(function(card) {
                 if (card.isSelected) {

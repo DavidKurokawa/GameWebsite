@@ -1,12 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" media="all" href="css/style.css" /> <!-- TODO  -->
-
-    <style>
-        body{background-color: white;}
-        canvas{border:1px solid black;}
-    </style>
+    <link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
 
     <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script> <!-- TODO  -->
 
@@ -24,8 +19,10 @@
 </head>
 
 <body>
-    <canvas id="canvas" width=1200 height=900></canvas>
-    <script> initialize(); </script>
+    <div id="deck-button-wrapper">
+        <button id="standard-button" onclick="initializeStandard()"></button>
+        <button id="sushi-go-button" onclick="initializeSushiGo()"></button>
+    </div>
 </body>
 
 </html>

@@ -8,8 +8,9 @@ var sockets = [];
 setInterval(requestStatusReport, 10000);
 
 // link files
-app.use("/scripts", express.static(__dirname + "/scripts"));
+app.use("/css", express.static(__dirname + "/css"));
 app.use("/imgs", express.static(__dirname + "/imgs"));
+app.use("/scripts", express.static(__dirname + "/scripts"));
 app.get("/", function(req, res) {
     res.sendfile("index.html");
 });

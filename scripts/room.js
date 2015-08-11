@@ -2,13 +2,10 @@
 function Room(canvasId, cardMap) {
     // constructor
     this.id;
-    var canvas = document.getElementById(canvasId);
-    this.ctx = canvas.getContext("2d");
-    var offset = $("#" + canvasId).offset();
-    this.offsetX = offset.left;
-    this.offsetY = offset.top;
-    this.width = canvas.width;
-    this.height = canvas.height;
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas.getContext("2d");
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
     this.cardMap = cardMap;
     this.send = setUpServer(this);
     this.privateAreas = [
@@ -32,6 +29,16 @@ function Room(canvasId, cardMap) {
         that.redraw(false);
         setUpInputListeners(that);
     }, 2000);
+
+    // get the x offset of the room
+    this.offsetX = function() {
+        return this.canvas.getBoundingClientRect().left;
+    }
+    
+    // get the y offset of the room
+    this.offsetY = function() {
+        return this.canvas.getBoundingClientRect().top;
+    }
 
     // redraw the room
     this.redraw = function(report) {

@@ -1,0 +1,36 @@
+body {
+    background-color: #F2F2F2;
+    text-align: center;
+}
+
+#game-room {
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    width: 1200px;
+    height: 900px;
+}
+
+#deck-button-wrapper {
+    position: fixed;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 160px;
+}
+
+#standard-button, #sushi-go-button {
+    background-size: 100px 156px;
+    height: 160px;  
+    width: 104px;
+}
+
+#standard-button {
+    background-image: url("../imgs/standard/back.jpg");
+}
+
+#sushi-go-button {
+    background-image: url("../imgs/sushi_go/back.png");
+}
+
