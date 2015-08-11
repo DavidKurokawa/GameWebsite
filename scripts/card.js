@@ -125,7 +125,7 @@ function Card(frontSrc, backSrc, locX, locY, width, height) {
             var croppedX = x >= this.room.privateArea.x1 ? 0 : (this.room.privateArea.x1 - x);
             var croppedY = y >= this.room.privateArea.y1 ? 0 : (this.room.privateArea.y1 - y);
             var croppedWidth = x + w <= this.room.privateArea.x2 ? w : (this.room.privateArea.x2 - x);
-            var croppedHeight = h - croppedY;
+            var croppedHeight = y + h <= this.room.privateArea.y2 ? h : (this.room.privateArea.y2 - y);
             this.ctx.drawImage(imgPrivate,
                                croppedX,
                                croppedY,
