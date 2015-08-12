@@ -1,9 +1,3 @@
-// TODO: implement a context-menu that lets me shuffle, form a deck, and flip a bunch of cards
-// TODO: make sure I'm dealing with e.clientX/Y and mouseX/Y well
-// TODO: there are some obvious issues with timing and the states can get a bit out of whack (not sure if this should be fixed?)
-// TODO: maybe make it so that the private areas can shut off some of their doors?
-// TODO: in general, it's annoying that you can be looking at some cards, and then if you click on one it covers everything behind it
-
 // initialize with the provided deck
 function initialize(deck) {
     // start room
@@ -26,10 +20,10 @@ function initializeStandard() {
     var x = 10;
     for (var suit of ["S", "H", "C", "D"]) {
         for (var rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
-            ret.push(new Card("./imgs/standard/" + rank + suit + ".png",
-                              "./imgs/standard/big_" + rank + suit + ".png",
-                              "./imgs/standard/back.jpeg",
-                              "./imgs/standard/big_back.jpeg",
+            ret.push(new Card("/imgs/standard/" + rank + suit + ".png",
+                              "/imgs/standard/big_" + rank + suit + ".png",
+                              "/imgs/standard/back.jpeg",
+                              "/imgs/standard/big_back.jpeg",
                               x,
                               10,
                               100,
@@ -61,10 +55,10 @@ function initializeSushiGo() {
     for (var type in types) {
         if (types.hasOwnProperty(type)) {
             for (var i = 0; i < types[type]; ++i) {
-                ret.push(new Card("./imgs/sushi_go/" + type + ".png",
-                                  "./imgs/sushi_go/big_" + type + ".png",
-                                  "./imgs/sushi_go/back.png",
-                                  "./imgs/sushi_go/big_back.png",
+                ret.push(new Card("/imgs/sushi_go/" + type + ".png",
+                                  "/imgs/sushi_go/big_" + type + ".png",
+                                  "/imgs/sushi_go/back.png",
+                                  "/imgs/sushi_go/big_back.png",
                                   x,
                                   y,
                                   100,

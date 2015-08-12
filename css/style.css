@@ -27,10 +27,10 @@ body {
 }
 
 #standard-button {
-    background-image: url("../imgs/standard/big_back.jpeg");
+    background-image: url("/imgs/standard/big_back.jpeg");
 }
 
 #sushi-go-button {
-    background-image: url("../imgs/sushi_go/big_back.png");
+    background-image: url("/imgs/sushi_go/big_back.png");
 }
 

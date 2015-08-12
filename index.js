@@ -12,7 +12,7 @@ setInterval(requestStatusReport, 10000);
 // link files
 app.use("/css", express.static(__dirname + "/css"));
 app.use("/imgs", express.static(__dirname + "/imgs"));
-app.use("/scripts", express.static(__dirname + "/scripts"));
+app.use("/js", express.static(__dirname + "/js"));
 app.get("/", function(req, res) {
     res.sendfile("index.html");
 });
