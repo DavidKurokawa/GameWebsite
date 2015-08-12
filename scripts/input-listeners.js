@@ -7,7 +7,8 @@ function setUpInputListeners(room) {
     var isGroupSelecting = false;
     var mouseX;
     var mouseY;
-    var isMouseDown = false;
+    var isLeftMouseButtonDown = false;
+    var isRightMouseButtonDown = false;
     var hasMouseMovedWhenDown;
     room.canvas.oncontextmenu = function() { return false; };
     $(document).mousedown(function(e) { handleMouseDown(e); });
@@ -28,7 +29,7 @@ function setUpInputListeners(room) {
 
     // handle left mouse button down events
     function handleLeftMouseButtonDown(e) {
-        isMouseDown = true;
+        isLeftMouseButtonDown = true;
         hasMouseMovedWhenDown = false;
         var selected = room.getTopmostCardAt(mouseX, mouseY);
         if (e.ctrlKey) {
@@ -65,8 +66,8 @@ function setUpInputListeners(room) {
         }
     }
 
-    // handle right mouse button down events
-    function handleRightMouseButtonDown(e) {
+    // enlarge the topmost card at the current mouse location
+    function enlargeTopmostCardAtMouseLocation() {
         var card = room.getTopmostCardAt(mouseX, mouseY);
         if (card != null) {
             var img = card.isUpPublicly ? card.imgEnlargedFront : card.imgEnlargedBack;
@@ -75,6 +76,12 @@ function setUpInputListeners(room) {
             }
             room.display(img);
         }
+    }
+
+    // handle right mouse button down events
+    function handleRightMouseButtonDown(e) {
+        isRightMouseButtonDown = true;
+        enlargeTopmostCardAtMouseLocation();
     }
 
     // handle mouse down events
@@ -110,12 +117,13 @@ function setUpInputListeners(room) {
             room.redraw(true);
         }
         // clean up
-        isMouseDown = false;
+        isLeftMouseButtonDown = false;
         isGroupSelecting = false;
     }
 
     // handle right mouse button up events
     function handleRightMouseButtonUp() {
+        isRightMouseButtonDown = false;
         room.undisplay();
     }
 
@@ -133,7 +141,7 @@ function setUpInputListeners(room) {
         hasMouseMovedWhenDown = true;
         mouseX = e.clientX - room.offsetX();
         mouseY = e.clientY - room.offsetY();
-        if (isMouseDown && !isGroupSelecting) {
+        if (isLeftMouseButtonDown && !isGroupSelecting) {
             room.cards.foreach(function(card) {
                 if (card.isSelected) {
                     var newX = mouseX - card.draggingOffsetX;
@@ -142,7 +150,7 @@ function setUpInputListeners(room) {
                 }
             });
         }
-        if (isMouseDown) {
+        if (isLeftMouseButtonDown) {
             room.redraw(!isGroupSelecting);
         }
         if (isGroupSelecting) {
@@ -151,6 +159,9 @@ function setUpInputListeners(room) {
                                 groupSelectionY,
                                 mouseX - groupSelectionX,
                                 mouseY - groupSelectionY);
+        }
+        if (isRightMouseButtonDown) {
+            enlargeTopmostCardAtMouseLocation();
         }
     }
 

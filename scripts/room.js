@@ -249,12 +249,14 @@ function Room(canvasId, cardMap) {
     }
 
     this.display = function(img) {
-        this.displayed = img;
-        this.redraw();
+        if (this.displayed != img) {
+            this.displayed = img;
+            this.redraw(false);
+        }
     }
 
     this.undisplay = function() {
         delete this.displayed;
-        this.redraw();
+        this.redraw(false);
     }
 }
