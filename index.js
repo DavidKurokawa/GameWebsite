@@ -6,7 +6,7 @@ var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var sockets = [];
 var unavailablePrivateAreas = {};
-var availableColors = ["FF8C00", "#FF0000", "#00DD00", "#0000FF"];
+var availableColors = ["#FF8C00", "#FF0000", "#00DD00", "#0000FF"];
 setInterval(requestStatusReport, 10000);
 
 // link files
