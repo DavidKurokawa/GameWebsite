@@ -187,12 +187,13 @@ function setUpInputListeners(room) {
 
     // handle key press events
     function handleKeyPress(e) {
-        console.log("keycode = " + e.keyCode);
-        if (e.keyCode == 100) {
+        var code = e.keyCode || e.charCode;
+        console.log("keycode = " + code);
+        if (code == 100) {
             room.formDeck(mouseX, mouseY, room.getSelectedCards(), true);
-        } else if (e.keyCode == 115) {
+        } else if (code == 115) {
             room.reorderSelected();
-        } else if (e.keyCode == 102) {
+        } else if (code == 102) {
             room.flipSelected();
         }
     }
