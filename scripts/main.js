@@ -28,8 +28,8 @@ function initializeStandard() {
         for (var rank of ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]) {
             ret.push(new Card("./imgs/standard/" + rank + suit + ".png",
                               "./imgs/standard/big_" + rank + suit + ".png",
-                              "./imgs/standard/back.jpg",
-                              "./imgs/standard/big_back.jpg",
+                              "./imgs/standard/back.jpeg",
+                              "./imgs/standard/big_back.jpeg",
                               x,
                               10,
                               100,
