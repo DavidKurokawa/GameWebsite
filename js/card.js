@@ -128,8 +128,12 @@ function Card(frontSrc, enlargedFrontSrc, backSrc, enlargedBackSrc, locX, locY, 
             var imgPrivate = this.isUpPrivately ? this.imgFront : this.imgBack;
             var croppedX = x >= this.room.privateArea.x1 ? 0 : (this.room.privateArea.x1 - x);
             var croppedY = y >= this.room.privateArea.y1 ? 0 : (this.room.privateArea.y1 - y);
-            var croppedWidth = x + w <= this.room.privateArea.x2 ? w : (this.room.privateArea.x2 - x);
-            var croppedHeight = y + h <= this.room.privateArea.y2 ? h : (this.room.privateArea.y2 - y);
+            var croppedWidth = x + w <= this.room.privateArea.x2
+                    ? x + w - Math.max(x, this.room.privateArea.x1)
+                    : (this.room.privateArea.x2 - x);
+            var croppedHeight = y + h <= this.room.privateArea.y2
+                    ? y + h - Math.max(y, this.room.privateArea.y1)
+                    : (this.room.privateArea.y2 - y);
             this.ctx.drawImage(imgPrivate,
                                croppedX,
                                croppedY,
