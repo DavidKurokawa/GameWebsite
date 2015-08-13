@@ -37,17 +37,22 @@ function unclaimPrivateArea(socket) {
 // sync the status of the provided medium
 function syncStatus(medium) {
     var msg = "ss";
+    for (var playerId in room.colorMap) {
+        msg += " " + playerId + " " + room.colorMap[playerId];
+    }
+    msg += " #";
     room.privateAreas.forEach(function(privateArea) {
-        msg += " " + (privateArea.isClaimed() ? privateArea.color : "#");
+        msg += " " + (privateArea.isClaimed() ? privateArea.playerId : "#");
     });
     room.cards.forEach(function(card) {
         msg += " " + card.id
              + " " + card.locX
              + " " + card.locY
              + " " + (card.isUpPublicly ? 1 : 0);
-        for (var color in card.selectors) {
-            msg += " " + color;
+        for (var playerId in card.selectors) {
+            msg += " " + playerId;
         }
+        msg += " #";
     });
     emit(medium, msg);
 }
@@ -56,8 +61,10 @@ function syncStatus(medium) {
 io.on("connection", function(socket) {
     // handle a connection
     socket.color = availableColors.pop(); // TODO: this will fail if there are too many connections
-    emit(socket, "id " + socket.color);
-    emit(socket.broadcast, "u+");
+    socket.playerId = sockets.length;
+    var newUserSuffix = socket.playerId + " " + socket.color;
+    emit(socket, "id " + newUserSuffix);
+    emit(socket.broadcast, "u+ " + newUserSuffix);
     syncStatus(socket);
     sockets.push(socket);
 
@@ -78,7 +85,7 @@ io.on("connection", function(socket) {
                 unclaimPrivateArea(socket);
                 socket.privateArea = privateArea;
                 unavailablePrivateAreas[privateArea] = 1;
-                emit(io, "cp " + privateArea + " " + socket.color);
+                emit(io, "cp " + privateArea + " " + socket.playerId);
             }
         } else if (cmd == "up") {
             unclaimPrivateArea(socket);

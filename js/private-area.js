@@ -13,16 +13,16 @@
         this.claimY1 = claimY1;
         this.claimX2 = claimX2;
         this.claimY2 = claimY2;
-        this.color;
+        this.playerId;
 
         // check if this private is the player's
         this.isMine = function() {
-            return this.color == this.room.color;
+            return this.playerId == this.room.id;
         }
 
         // check if this private area is claimed
         this.isClaimed = function() {
-            return typeof this.color !== "undefined";
+            return typeof this.playerId !== "undefined";
         }
 
         // check if the given coordinates are in the private area
@@ -35,16 +35,16 @@
             return this.claimX1 <= x && x <= this.claimX2 && this.claimY1 <= y && y <= this.claimY2;
         }
 
-        // claim the private area with the provided color
-        this.claim = function(color) {
-            this.color = color;
+        // claim the private area with the provided player
+        this.claim = function(playerId) {
+            this.playerId = playerId;
             // TODO: maybe make it more gradual?
             this.room.redraw(false);
         }
 
         // unclaim the private area
         this.unclaim = function() {
-            delete this.color;
+            delete this.playerId;
             this.room.redraw(false);
         }
 
@@ -54,9 +54,10 @@
                 return;
             }
             if (this.isClaimed()) {
-                this.ctx.strokeStyle = this.color;
+                var color = this.room.colorMap[this.playerId];
+                this.ctx.strokeStyle = color;
                 this.ctx.strokeRect(this.x1, this.y1, this.x2 - this.x1, this.y2 - this.y1);
-                this.ctx.fillStyle = this.color;
+                this.ctx.fillStyle = color;
                 this.ctx.fillRect(this.claimX1,
                                   this.claimY1,
                                   this.claimX2 - this.claimX1,

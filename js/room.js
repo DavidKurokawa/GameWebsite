@@ -13,7 +13,9 @@
     // game room
     context.Room = function(isServer, canvas, canvasWidth, canvasHeight, cardMap) {
         // constructor
+        this.id;
         this.color;
+        this.colorMap = {};
         this.canvas = canvas;
         this.width = canvasWidth;
         this.height = canvasHeight;

@@ -13,24 +13,24 @@ function setUpServer(room) {
         var split = msg.split(" ");
         var cmd = split[0];
         if (cmd == "m") {
-            var color = split[1];
+            var id = parseInt(split[1]);
             var x = parseInt(split[2]);
             var y = parseInt(split[3]);
             room.cards.forEach(function(card) {
-                if (color in card.selectors) {
-                    var newX = x - card.selectors[color]["x"];
-                    var newY = y - card.selectors[color]["y"];
+                if (id in card.selectors) {
+                    var newX = x - card.selectors[id]["x"];
+                    var newY = y - card.selectors[id]["y"];
                     card.move(newX, newY, false);
                 }
             });
             room.redraw(false);
         } else if (cmd == "do") {
-            var color = split[1];
+            var id = parseInt(split[1]);
             var x = parseInt(split[2]);
             var y = parseInt(split[3]);
             room.cards.forEach(function(card) {
-                if (color in card.selectors) {
-                    card.setDraggingOffsetFor(color, x - card.locX, y - card.locY);
+                if (id in card.selectors) {
+                    card.setDraggingOffsetFor(id, x - card.locX, y - card.locY);
                 }
             });
         } else if (cmd == "am") {
@@ -39,13 +39,13 @@ function setUpServer(room) {
             var y = parseInt(split[3]);
             room.cardMap[cardId].move(x, y, false);
         } else if (cmd == "se") {
-            var color = split[1];
+            var id = parseInt(split[1]);
             var cardId = split[2];
-            room.cardMap[cardId].selectedBy(color);
+            room.cardMap[cardId].selectedBy(id);
         } else if (cmd == "us") {
-            var color = split[1];
+            var id = parseInt(split[1]);
             var cardId = split[2];
-            room.cardMap[cardId].unselectedBy(color);
+            room.cardMap[cardId].unselectedBy(id);
         } else if (cmd == "fl") {
             var cardId = parseInt(split[1]);
             room.cardMap[cardId].flip(true);
@@ -62,42 +62,50 @@ function setUpServer(room) {
                 arr[i - 3] = room.cardMap[parseInt(split[i])];
             room.formDeck(x, y, arr, false);
         } else if (cmd == "u+") {
-            console.log("A new user has joined!");
+            var id = parseInt(split[1]);
+            var color = split[2];
+            room.colorMap[id] = color;
         } else if (cmd == "u-") {
             console.log("A user has left.");
         } else if (cmd == "ss") {
-            for (var i = 1; i <= room.privateAreas.length; ++i) {
+            var i = 1;
+            while (i < split.length && split[i] != "#") {
+                var id = parseInt(split[i++]);
+                var color = split[i++];
+                room.colorMap[id] = color;
+            }
+            ++i;
+            for (var j = 0; j < room.privateAreas.length; ++j) {
                 if (split[i] == "#") {
-                    room.privateAreas[i - 1].unclaim();
+                    room.privateAreas[j].unclaim();
                 } else {
-                    room.privateAreas[i - 1].claim(split[i]);
+                    room.privateAreas[j].claim(parseInt(split[i]));
                 }
+                ++i;
             }
             var newCards = new Array(room.cardMap.length);
-            var offset = 1 + room.privateAreas.length;
-            var j = 0;
-            var i = offset;
-            while (i < split.length) {
+            for (var j = 0; i < split.length; ++j) {
                 var cardId = parseInt(split[i]);
                 var card = room.cardMap[cardId];
                 card.selectors = {};
                 card.locX = parseInt(split[++i]);
                 card.locY = parseInt(split[++i]);
                 card.isUpPublicly = split[++i] == "1";
-                while (++i < split.length && split[i].charAt(0) == "#") {
-                    card.selectedBy(split[i]);
+                while (++i < split.length && split[i] != "#") {
+                    card.selectedBy(parseInt(split[i]));
                 }
-                newCards[j++] = card;
+                newCards[j] = card;
+                ++i;
             }
             room.cards = new document.DoublyLinkedList(newCards);
             room.redraw(false);
         } else if (cmd == "cp") {
             var privateArea = room.privateAreas[parseInt(split[1])];
-            var color = split[2];
-            if (color == room.color) {
+            var id = parseInt(split[2]);
+            if (id == room.id) {
                 room.privateArea = privateArea;
             }
-            privateArea.claim(color);
+            privateArea.claim(id);
         } else if (cmd == "up") {
             var privateArea = room.privateAreas[parseInt(split[1])];
             if (privateArea.isMine()) {
@@ -105,7 +113,9 @@ function setUpServer(room) {
             }
             privateArea.unclaim();
         } else if (cmd == "id") {
-            room.color = split[1];
+            room.id = parseInt(split[1]);
+            room.color = split[2];
+            room.colorMap[room.id] = room.color;
         }
     };
 })(typeof exports === "undefined" ? document : exports);
