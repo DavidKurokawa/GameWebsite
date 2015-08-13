@@ -16,7 +16,7 @@ app.use("/css", express.static(__dirname + "/css"));
 app.use("/imgs", express.static(__dirname + "/imgs"));
 app.use("/js", express.static(__dirname + "/js"));
 app.get("/", function(req, res) {
-    res.sendfile("index.html");
+    res.sendFile(__dirname + "/index.html");
 });
 
 // emit the given message to the given medium
