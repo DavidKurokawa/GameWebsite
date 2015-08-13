@@ -21,8 +21,8 @@ app.get("/", function(req, res) {
 
 // emit the given message to the given medium
 function emit(medium, msg) {
-    console.log("msg: " + msg);
-    medium.emit("msg", msg);
+    console.log("m: " + msg);
+    medium.emit("m", msg);
 }
 
 // unclaim the provided socket's private area
@@ -37,9 +37,9 @@ function unclaimPrivateArea(socket) {
 // sync the status of the provided medium
 function syncStatus(medium) {
     var msg = "ss";
-    for (var playerId in room.colorMap) {
-        msg += " " + playerId + " " + room.colorMap[playerId];
-    }
+    sockets.forEach(function(socket) {
+        msg += " " + socket.playerId + " " + socket.color;
+    });
     msg += " #";
     room.privateAreas.forEach(function(privateArea) {
         msg += " " + (privateArea.isClaimed() ? privateArea.playerId : "#");
@@ -77,7 +77,7 @@ io.on("connection", function(socket) {
     });
 
     // message handler
-    socket.on("msg", function(msg) {
+    socket.on("m", function(msg) {
         var cmd = msg.substring(0, 2);
         if (cmd == "rp") {
             var privateArea = parseInt(msg.substring("rp ".length));

@@ -1,9 +1,9 @@
 // server communicator via Socket.IO
 function setUpServer(room) {
     var socket = io();
-    socket.on("msg", function(msg) { document.parseMessage(room, msg); });
+    socket.on("m", function(msg) { document.parseMessage(room, msg); });
     return function(msg) {
-        socket.emit("msg", msg);
+        socket.emit("m", msg);
     };
 };
 
