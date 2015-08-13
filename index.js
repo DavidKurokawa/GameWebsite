@@ -7,7 +7,9 @@ var io = require("socket.io")(http);
 var sockets = [];
 var unavailablePrivateAreas = {};
 var availableColors = ["#FF8C00", "#FF0000", "#00DD00", "#0000FF"];
-setInterval(requestStatusReport, 10000);
+var main = require(__dirname + "/js/main");
+var room = main.initializeSushiGo(true);
+var coms = require(__dirname + "/js/server");
 
 // link files
 app.use("/css", express.static(__dirname + "/css"));
@@ -23,16 +25,6 @@ function emit(medium, msg) {
     medium.emit("msg", msg);
 }
 
-// request a status report from some active connection
-function requestStatusReport() {
-    for (var i = 0; i < sockets.length; ++i) {
-        if (sockets[i].connected) {
-            emit(sockets[i], "rs");
-            break;
-        }
-    }
-}
-
 // unclaim the provided socket's private area
 function unclaimPrivateArea(socket) {
     if (typeof socket.privateArea !== "undefined") {
@@ -42,13 +34,28 @@ function unclaimPrivateArea(socket) {
     }
 }
 
+// sync the status of the provided medium
+function syncStatus(medium) {
+    var msg = "ss";
+    room.privateAreas.forEach(function(privateArea) {
+        msg += " " + (privateArea.isClaimed() ? privateArea.color : "#");
+    });
+    room.cards.forEach(function(card) {
+            msg += " " + card.id
+            + " " + card.locX
+            + " " + card.locY
+            + " " + (card.isUpPublicly ? 1 : 0);
+    });
+    emit(medium, msg);
+}
+
 // connection handler
 io.on("connection", function(socket) {
     // handle a connection
     socket.color = availableColors.pop(); // TODO: this will fail if there are too many connections
     emit(socket, "id " + socket.color);
     emit(socket.broadcast, "u+");
-    requestStatusReport();
+    syncStatus(socket);
     sockets.push(socket);
 
     // disconnect handler
@@ -73,6 +80,7 @@ io.on("connection", function(socket) {
         } else if (cmd == "up") {
             unclaimPrivateArea(socket);
         } else {
+            coms.parseMessage(room, msg);
             emit(socket.broadcast, msg);
         }
     });

@@ -1,7 +1,6 @@
 // input listeners
 function setUpInputListeners(room) {
     // set up
-    var room = room;
     var groupSelectionX;
     var groupSelectionY;
     var isGroupSelecting = false;
@@ -19,7 +18,7 @@ function setUpInputListeners(room) {
 
     // readjust offset of mouse location to cards for dragging
     function adjustRelativeLocations(x, y) {
-        room.cards.foreach(function(card) {
+        room.cards.forEach(function(card) {
             if (card.isSelected) {
                 card.draggingOffsetX = x - card.locX;
                 card.draggingOffsetY = y - card.locY;
@@ -97,7 +96,7 @@ function setUpInputListeners(room) {
     function handleLeftMouseButtonUp(e) {
         // check group selection
         if (isGroupSelecting) {
-            room.cards.foreach(function(card) {
+            room.cards.forEach(function(card) {
                 var rectX1 = Math.min(groupSelectionX, mouseX);
                 var rectY1 = Math.min(groupSelectionY, mouseY);
                 var rectX2 = Math.max(groupSelectionX, mouseX);
@@ -142,7 +141,7 @@ function setUpInputListeners(room) {
         mouseX = e.clientX - room.offsetX();
         mouseY = e.clientY - room.offsetY();
         if (isLeftMouseButtonDown && !isGroupSelecting) {
-            room.cards.foreach(function(card) {
+            room.cards.forEach(function(card) {
                 if (card.isSelected) {
                     var newX = mouseX - card.draggingOffsetX;
                     var newY = mouseY - card.draggingOffsetY;
