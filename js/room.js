@@ -207,6 +207,7 @@
             for (var i = 0; i < n; ++i) {
                 var j = perm[i];
                 selected[j].move(xs[i], ys[i], true);
+                this.send("am " + selected[j].id + " " + xs[i] + " " + ys[i]);
                 this.moveCardToTop(selected[j], true);
             }
             this.redraw(true);

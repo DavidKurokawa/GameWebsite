@@ -41,10 +41,13 @@ function syncStatus(medium) {
         msg += " " + (privateArea.isClaimed() ? privateArea.color : "#");
     });
     room.cards.forEach(function(card) {
-            msg += " " + card.id
-            + " " + card.locX
-            + " " + card.locY
-            + " " + (card.isUpPublicly ? 1 : 0);
+        msg += " " + card.id
+             + " " + card.locX
+             + " " + card.locY
+             + " " + (card.isUpPublicly ? 1 : 0);
+        for (var color in card.selectors) {
+            msg += " " + color;
+        }
     });
     emit(medium, msg);
 }

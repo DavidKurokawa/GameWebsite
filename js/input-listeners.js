@@ -18,10 +18,10 @@ function setUpInputListeners(room) {
 
     // readjust offset of mouse location to cards for dragging
     function adjustRelativeLocations(x, y) {
+        room.send("do " + room.color + " " + x + " " + y);
         room.cards.forEach(function(card) {
             if (card.isSelected) {
-                card.draggingOffsetX = x - card.locX;
-                card.draggingOffsetY = y - card.locY;
+                card.setDraggingOffset(x - card.locX, y - card.locY);
             }
         });
     }
@@ -32,7 +32,6 @@ function setUpInputListeners(room) {
         hasMouseMovedWhenDown = false;
         var selected = room.getTopmostCardAt(mouseX, mouseY);
         if (e.ctrlKey) {
-            adjustRelativeLocations(mouseX, mouseY);
             // if ctrl is down and the selected card is already selected: adjust all relative locations and unselect the card
             if (selected != null && selected.isSelected) {
                 selected.unselect();
@@ -46,7 +45,6 @@ function setUpInputListeners(room) {
                 room.unselectAll();
             // if ctrl is up and the selected card is already selected: adjust all relative locations and reselect the card
             } else if (selected.isSelected) {
-                adjustRelativeLocations(mouseX, mouseY);
                 selected.select(mouseX, mouseY);
             // if ctrl is up and the selected card is not already selected: select that card and unselect everything else
             } else {
@@ -54,6 +52,7 @@ function setUpInputListeners(room) {
                 selected.select(mouseX, mouseY);
             }
         }
+        adjustRelativeLocations(mouseX, mouseY);
         if (selected != null) {
             room.moveCardToTop(selected, true);
         }
@@ -141,6 +140,7 @@ function setUpInputListeners(room) {
         mouseX = e.clientX - room.offsetX();
         mouseY = e.clientY - room.offsetY();
         if (isLeftMouseButtonDown && !isGroupSelecting) {
+            room.send("m " + room.color + " " + mouseX + " " + mouseY);
             room.cards.forEach(function(card) {
                 if (card.isSelected) {
                     var newX = mouseX - card.draggingOffsetX;
@@ -150,7 +150,7 @@ function setUpInputListeners(room) {
             });
         }
         if (isLeftMouseButtonDown) {
-            room.redraw(!isGroupSelecting);
+            room.redraw(false);
         }
         if (isGroupSelecting) {
             room.ctx.strokeStyle = "#FF0000";

@@ -12,19 +12,48 @@ function setUpServer(room) {
     context.parseMessage = function(room, msg) {
         var split = msg.split(" ");
         var cmd = split[0];
-        if (cmd == "mv") {
-            var cardIdx = parseInt(split[1]);
+        if (cmd == "m") {
+            var color = split[1];
             var x = parseInt(split[2]);
             var y = parseInt(split[3]);
-            room.cardMap[cardIdx].move(x, y, false);
+            room.cards.forEach(function(card) {
+                if (color in card.selectors) {
+                    var newX = x - card.selectors[color]["x"];
+                    var newY = y - card.selectors[color]["y"];
+                    card.move(newX, newY, false);
+                }
+            });
+            room.redraw(false);
+        } else if (cmd == "do") {
+            var color = split[1];
+            var x = parseInt(split[2]);
+            var y = parseInt(split[3]);
+            room.cards.forEach(function(card) {
+                if (color in card.selectors) {
+                    card.setDraggingOffsetFor(color, x - card.locX, y - card.locY);
+                }
+            });
+        } else if (cmd == "am") {
+            var cardId = parseInt(split[1]);
+            var x = parseInt(split[2]);
+            var y = parseInt(split[3]);
+            room.cardMap[cardId].move(x, y, false);
+        } else if (cmd == "se") {
+            var color = split[1];
+            var cardId = split[2];
+            room.cardMap[cardId].selectedBy(color);
+        } else if (cmd == "us") {
+            var color = split[1];
+            var cardId = split[2];
+            room.cardMap[cardId].unselectedBy(color);
         } else if (cmd == "fl") {
-            var cardIdx = parseInt(split[1]);
-            room.cardMap[cardIdx].flip(true);
+            var cardId = parseInt(split[1]);
+            room.cardMap[cardId].flip(true);
         } else if (cmd == "rd") {
             room.redraw(false);
         } else if (cmd == "tt") {
-            var cardIdx = parseInt(split[1]);
-            room.moveCardToTop(room.cardMap[cardIdx], false);
+            var cardId = parseInt(split[1]);
+            room.moveCardToTop(room.cardMap[cardId], false);
         } else if (cmd == "fd") {
             var x = parseInt(split[1]);
             var y = parseInt(split[2]);
@@ -46,13 +75,19 @@ function setUpServer(room) {
             }
             var newCards = new Array(room.cardMap.length);
             var offset = 1 + room.privateAreas.length;
-            for (var i = offset; i < split.length; i += 4) {
+            var j = 0;
+            var i = offset;
+            while (i < split.length) {
                 var cardId = parseInt(split[i]);
                 var card = room.cardMap[cardId];
-                card.locX = parseInt(split[i + 1]);
-                card.locY = parseInt(split[i + 2]);
-                card.isUpPublicly = split[i + 3] == "1";
-                newCards[(i - offset)/4] = card;
+                card.selectors = {};
+                card.locX = parseInt(split[++i]);
+                card.locY = parseInt(split[++i]);
+                card.isUpPublicly = split[++i] == "1";
+                while (++i < split.length && split[i].charAt(0) == "#") {
+                    card.selectedBy(split[i]);
+                }
+                newCards[j++] = card;
             }
             room.cards = new document.DoublyLinkedList(newCards);
             room.redraw(false);

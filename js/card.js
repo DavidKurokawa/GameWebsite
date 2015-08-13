@@ -32,6 +32,7 @@
         this.isMovingSlowly = false;
         this.draggingOffsetX = 0;
         this.draggingOffsetY = 0;
+        this.selectors = {};
 
         // set the room to use
         this.setRoom = function(room) {
@@ -156,8 +157,14 @@
             this.room.redrawPrivateAreas();
         };
 
+        // set the dragging offset
+        this.setDraggingOffset = function(x, y) {
+            this.draggingOffsetX = x;
+            this.draggingOffsetY = y;
+        }
+
         // move the card
-        this.move = function(x, y, report) {
+        this.move = function(x, y, report) { // TODO: no longer need this report!
             x = Math.max(x, 0);
             x = Math.min(x, this.room.width - this.width);
             y = Math.max(y, 0);
@@ -166,29 +173,33 @@
             y = parseInt(y);
             this.locX = x;
             this.locY = y;
-            if (report) {
-                this.send("mv " + this.id + " " + x + " " + y);
-            }
         }
 
         // select the card
         this.select = function(x, y) {
+            if (!this.isSelected) {
+                this.send("se " + this.room.color + " " + this.id);
+            }
             this.isSelected = true;
-            this.draggingOffsetX = x - this.locX;
-            this.draggingOffsetY = y - this.locY;
             this.draw();
         };
 
         // unselect the card
         this.unselect = function() {
+            if (this.isSelected) {
+                this.send("us " + this.room.color + " " + this.id);
+            }
             this.isSelected = false;
             this.draw();
         };
 
         // toggle the selected status of the card
         this.toggleSelected = function() {
-            this.isSelected = !this.isSelected;
-            this.draw();
+            if (this.isSelected) {
+                this.unselect();
+            } else {
+                this.select();
+            }
         }
 
         // flip the card
@@ -204,6 +215,22 @@
                     this.send("fl " + this.id);
                 }
             }
+        }
+
+        // selected this color for the provided color
+        this.selectedBy = function(color) {
+            this.selectors[color] = {};
+        }
+
+        // unselect this card for the provided color
+        this.unselectedBy = function(color) {
+            delete this.selectors[color];
+        }
+
+        // set dragging offset for other players
+        this.setDraggingOffsetFor = function(color, x, y) {
+            this.selectors[color]["x"] = x;
+            this.selectors[color]["y"] = y;
         }
     };
 })(typeof exports === "undefined" ? document : exports);
