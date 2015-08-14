@@ -38,12 +38,17 @@
         // claim the private area with the provided player
         this.claim = function(playerId) {
             this.playerId = playerId;
-            // TODO: maybe make it more gradual?
+            if (playerId == this.room.id) {
+                this.room.privateArea = this.room.privateAreas[this.id];
+            }
             this.room.redraw(false);
         }
 
         // unclaim the private area
         this.unclaim = function() {
+            if (this.playerId == this.room.id) {
+                delete this.room.privateArea;
+            }
             delete this.playerId;
             this.room.redraw(false);
         }

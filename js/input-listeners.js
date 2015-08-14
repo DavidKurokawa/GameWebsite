@@ -170,9 +170,9 @@ function setUpInputListeners(room) {
         if (typeof privateArea !== "undefined") {
             // claim/unclaim any private areas if applicable
             if (!privateArea.isClaimed()) {
-                room.send("rp " + privateArea.id);
+                room.send("cp " + privateArea.id + " " + room.id);
             } else if (privateArea.isMine()) {
-                room.send("up");
+                room.send("up " + privateArea.id + " " + room.id);
             }
         } else {
             // flip over the topmost card the mouse is over

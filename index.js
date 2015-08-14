@@ -5,7 +5,6 @@ var app = express();
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var sockets = [];
-var unavailablePrivateAreas = {};
 var availableColors = ["#FF8C00", "#FF0000", "#00DD00", "#0000FF"];
 var main = require(__dirname + "/js/main");
 var room = main.initializeSushiGo(true);
@@ -23,15 +22,6 @@ app.get("/", function(req, res) {
 function emit(medium, msg) {
     console.log("m: " + msg);
     medium.emit("m", msg);
-}
-
-// unclaim the provided socket's private area
-function unclaimPrivateArea(socket) {
-    if (typeof socket.privateArea !== "undefined") {
-        emit(io, "up " + socket.privateArea);
-        delete unavailablePrivateAreas[socket.privateArea];
-        delete socket.privateArea;
-    }
 }
 
 // sync the status of the provided medium
@@ -73,26 +63,20 @@ io.on("connection", function(socket) {
         availableColors.push(socket.color);
         delete socket.color;
         emit(socket.broadcast, "u-");
-        unclaimPrivateArea(socket);
+        room.privateAreas.forEach(function(privateArea) {
+            if (socket.playerId == privateArea.playerId) {
+                privateArea.unclaim();
+                emit(socket.broadcast, "up " + privateArea.id + " " + privateArea.playerId);
+            }
+        });
     });
 
     // message handler
     socket.on("m", function(msg) {
-        var cmd = msg.substring(0, 2);
-        if (cmd == "rp") {
-            var privateArea = parseInt(msg.substring("rp ".length));
-            if (!(privateArea in unavailablePrivateAreas)) {
-                unclaimPrivateArea(socket);
-                socket.privateArea = privateArea;
-                unavailablePrivateAreas[privateArea] = 1;
-                emit(io, "cp " + privateArea + " " + socket.playerId);
-            }
-        } else if (cmd == "up") {
-            unclaimPrivateArea(socket);
-        } else {
-            coms.parseMessage(room, msg);
-            emit(socket.broadcast, msg);
-        }
+        var cmd = msg.substr(0, 2);
+        coms.parseMessage(room, msg);
+        // TODO: basing the medium based off the cmd is hacky, better fix this soon!
+        emit(cmd == "cp" || cmd == "up" ? io : socket.broadcast, msg);
     });
 });
 

@@ -100,18 +100,22 @@ function setUpServer(room) {
             room.cards = new document.DoublyLinkedList(newCards);
             room.redraw(false);
         } else if (cmd == "cp") {
-            var privateArea = room.privateAreas[parseInt(split[1])];
-            var id = parseInt(split[2]);
-            if (id == room.id) {
-                room.privateArea = privateArea;
+            var toClaim = room.privateAreas[parseInt(split[1])];
+            if (!toClaim.isClaimed()) {
+                var id = parseInt(split[2]);
+                room.privateAreas.forEach(function(privateArea) {
+                    if (id == privateArea.playerId) {
+                        privateArea.unclaim();
+                    }
+                });
+                toClaim.claim(id);
             }
-            privateArea.claim(id);
         } else if (cmd == "up") {
-            var privateArea = room.privateAreas[parseInt(split[1])];
-            if (privateArea.isMine()) {
-                delete room.privateArea;
+            var toUnclaim = room.privateAreas[parseInt(split[1])];
+            var id = parseInt(split[2]);
+            if (id == toUnclaim.playerId) {
+                toUnclaim.unclaim();
             }
-            privateArea.unclaim();
         } else if (cmd == "id") {
             room.id = parseInt(split[1]);
             room.color = split[2];
