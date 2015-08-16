@@ -137,6 +137,8 @@ function setUpServer(room) {
                 deck = moduleInitializer.sushiGoDeck(false);
             }
             room.initializeDeck(deck);
+        } else if (cmd == "rf") {
+            alert("Unfortunately, the room is full. Please try another room.");
         }
     };
 })(typeof exports === "undefined" ? document : exports);

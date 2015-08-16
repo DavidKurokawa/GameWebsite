@@ -95,8 +95,13 @@ app.post("/", function(req, res) {
     // connection handler
     namespace.on("connection", function(socket) {
         // handle a connection
+        if (availableColors.length == 0) {
+            emit(socket, "rf");
+            socket.disconnect();
+            return;
+        }
         ++activeConnections;
-        socket.color = availableColors.pop(); // TODO: this will fail if there are too many connections
+        socket.color = availableColors.pop();
         socket.playerId = sockets.length;
         var newUserSuffix = socket.playerId + " " + socket.color;
         emit(socket, "gm " + game);
