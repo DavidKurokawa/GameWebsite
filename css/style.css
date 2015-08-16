@@ -20,6 +20,10 @@ body {
     height: 472px;
 }
 
+.game-button-form {
+    display: inline;
+}
+
 #standard-button, #sushi-go-button {
     background-size: 300px 468px;
     height: 472px;

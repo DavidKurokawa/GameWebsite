@@ -1,27 +1,20 @@
 <!doctype html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
-
-    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script> <!-- TODO  -->
-
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script> <!-- TODO  -->
-
-    <script type="text/javascript" src="/js/card.js"></script>
-    <script type="text/javascript" src="/js/input-listeners.js"></script>
-    <script type="text/javascript" src="/js/linkedlist.js"></script>
-    <script type="text/javascript" src="/js/main.js"></script>
-    <script type="text/javascript" src="/js/private-area.js"></script>
-    <script type="text/javascript" src="/js/room.js"></script>
-    <script type="text/javascript" src="/js/server.js"></script>
-
+    <link rel="stylesheet" type="text/css" media="all" href="/css/style.css" />
     <title>Game Room</title>
 </head>
 
 <body>
     <div id="deck-button-wrapper">
-        <button id="standard-button" onclick="initializeStandard(false)"></button>
-        <button id="sushi-go-button" onclick="initializeSushiGo(false)"></button>
+        <form class="game-button-form" action="/" method="post" name="standard">
+            <input type="hidden" name="game" value="standard">
+            <button id="standard-button" type="submit"></button>
+        </form>
+        <form class="game-button-form" action="/" method="post" name="sushi-go">
+            <input type="hidden" name="game" value="sushi-go">
+            <button id="sushi-go-button" type="submit"></button>
+        </form>
     </div>
 </body>
 

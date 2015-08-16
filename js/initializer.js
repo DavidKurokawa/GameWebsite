@@ -10,30 +10,24 @@
         moduleRoom = require(__dirname + "/room");
     }
 
-    // initialize with the provided deck
-    context.initialize = function(isServer, deck) {
-        // start room
-        for (var i = 0; i < deck.length; ++i) {
-            deck[i].id = i;
-        }
+    // initialize the room
+    context.initializeRoom = function(isServer) {
         var canvas;
         var canvasId = "game-room";
         var canvasWidth = 1200;
         var canvasHeight = 900;
         if (!isServer) {
-            var deckButtonWrapper = document.getElementById("deck-button-wrapper");
-            document.body.removeChild(deckButtonWrapper);
             canvas = document.createElement("canvas");
             canvas.id = canvasId;
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
             document.body.appendChild(canvas);
         }
-        return new moduleRoom.Room(isServer, canvas, canvasWidth, canvasHeight, deck);
+        return new moduleRoom.Room(isServer, canvas, canvasWidth, canvasHeight);
     };
 
-    // initialize with a standard deck
-    context.initializeStandard = function(isServer) {
+    // create a standard deck
+    context.standardDeck = function(isServer) {
         var deck = [];
         var x = 10;
         ["S", "H", "C", "D"].forEach(function(suit) {
@@ -50,11 +44,11 @@
                 x += 20;
             });
         });
-        return context.initialize(isServer, deck);
+        return deck;
     };
 
-    // initialize with a Sushi Go deck
-    context.initializeSushiGo = function(isServer) {
+    // create a Sushi Go Deck
+    context.sushiGoDeck = function(isServer) {
         var deck = [];
         var x = 10;
         var y = 10;
@@ -91,6 +85,6 @@
                 }
             }
         }
-        return context.initialize(isServer, deck);
+        return deck;
     };
 })(typeof exports === "undefined" ? document : exports);

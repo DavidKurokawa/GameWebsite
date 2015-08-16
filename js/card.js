@@ -178,7 +178,7 @@
         // select the card
         this.select = function(x, y) {
             if (!this.isSelected) {
-                this.send("se " + this.room.id + " " + this.id);
+                this.send("se " + this.room.playerId + " " + this.id);
             }
             this.isSelected = true;
             this.draw();
@@ -187,7 +187,7 @@
         // unselect the card
         this.unselect = function() {
             if (this.isSelected) {
-                this.send("us " + this.room.id + " " + this.id);
+                this.send("us " + this.room.playerId + " " + this.id);
             }
             this.isSelected = false;
             this.draw();
@@ -218,19 +218,19 @@
         }
 
         // select this card for the provided player
-        this.selectedBy = function(id) {
-            this.selectors[id] = {};
+        this.selectedBy = function(playerId) {
+            this.selectors[playerId] = {};
         }
 
         // unselect this card for the provided player
-        this.unselectedBy = function(id) {
-            delete this.selectors[id];
+        this.unselectedBy = function(playerId) {
+            delete this.selectors[playerId];
         }
 
         // set dragging offset for other players
-        this.setDraggingOffsetFor = function(id, x, y) {
-            this.selectors[id]["x"] = x;
-            this.selectors[id]["y"] = y;
+        this.setDraggingOffsetFor = function(playerId, x, y) {
+            this.selectors[playerId]["x"] = x;
+            this.selectors[playerId]["y"] = y;
         }
     };
 })(typeof exports === "undefined" ? document : exports);

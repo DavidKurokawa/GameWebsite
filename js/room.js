@@ -11,21 +11,32 @@
     }
 
     // game room
-    context.Room = function(isServer, canvas, canvasWidth, canvasHeight, cardMap) {
+    context.Room = function(isServer, canvas, canvasWidth, canvasHeight) {
         // constructor
-        this.id;
+        this.playerId;
         this.color;
         this.colorMap = {};
         this.canvas = canvas;
         this.width = canvasWidth;
         this.height = canvasHeight;
-        this.cardMap = cardMap;
+        var claimAreaSize = 15;
+        // TODO: this is pretty hacky!
+        // we do this waiting for a few purposes:
+        // 1. we need to get the state from another connection if there are others
+        // 2. the images need to be downloaded from the server
+        // 3. we need to know the player id of the room to determine the private area
+        this.initialized = isServer;
         this.isServer = isServer;
         if (!isServer) {
             this.ctx = canvas.getContext("2d");
             this.send = setUpServer(this);
+            var that = this;
+            setTimeout(function() {
+                that.initialized = true;
+                that.redraw(false);
+                setUpInputListeners(that);
+            }, 2000);
         }
-        var claimAreaSize = 15;
         this.privateAreas = [
             new modulePrivateArea.PrivateArea(0,
                                               this,
@@ -68,29 +79,19 @@
                                               this.width,
                                               this.height)
         ];
-        this.cards = new moduleLinkedList.DoublyLinkedList(cardMap);
         this.displayed;
-        // TODO: this is pretty hacky!
-        // we do this waiting for a few purposes:
-        // 1. we need to get the state from another connection if there are others
-        // 2. the images need to be downloaded from the server
-        // 3. we need to know the id of the room to determine the private area
-        this.initialized = isServer;
-        if (isServer) {
+
+        // initialize deck
+        this.initializeDeck = function(deck) {
+            for (var i = 0; i < deck.length; ++i) {
+                deck[i].id = i;
+            }
+            this.cardMap = deck;
+            this.cards = new moduleLinkedList.DoublyLinkedList(this.cardMap);
             var that = this;
-            cardMap.forEach(function(card) {
+            this.cardMap.forEach(function(card) {
                 card.setRoom(that);
             });
-        } else {
-            var that = this;
-            setTimeout(function() {
-                cardMap.forEach(function(card) {
-                    card.setRoom(that);
-                });
-                that.initialized = true;
-                that.redraw(false);
-                setUpInputListeners(that);
-            }, 2000);
         }
 
         // get the x offset of the room

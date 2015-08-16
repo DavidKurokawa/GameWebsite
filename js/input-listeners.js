@@ -18,7 +18,7 @@ function setUpInputListeners(room) {
 
     // readjust offset of mouse location to cards for dragging
     function adjustRelativeLocations(x, y) {
-        room.send("do " + room.id + " " + x + " " + y);
+        room.send("do " + room.playerId + " " + x + " " + y);
         room.cards.forEach(function(card) {
             if (card.isSelected) {
                 card.setDraggingOffset(x - card.locX, y - card.locY);
@@ -140,7 +140,7 @@ function setUpInputListeners(room) {
         mouseX = e.clientX - room.offsetX();
         mouseY = e.clientY - room.offsetY();
         if (isLeftMouseButtonDown && !isGroupSelecting) {
-            room.send("m " + room.id + " " + mouseX + " " + mouseY);
+            room.send("m " + room.playerId + " " + mouseX + " " + mouseY);
             room.cards.forEach(function(card) {
                 if (card.isSelected) {
                     var newX = mouseX - card.draggingOffsetX;
@@ -170,9 +170,9 @@ function setUpInputListeners(room) {
         if (typeof privateArea !== "undefined") {
             // claim/unclaim any private areas if applicable
             if (!privateArea.isClaimed()) {
-                room.send("cp " + privateArea.id + " " + room.id);
+                room.send("cp " + privateArea.id + " " + room.playerId);
             } else if (privateArea.isMine()) {
-                room.send("up " + privateArea.id + " " + room.id);
+                room.send("up " + privateArea.id + " " + room.playerId);
             }
         } else {
             // flip over the topmost card the mouse is over

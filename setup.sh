@@ -6,6 +6,7 @@ sudo apt-get install nodejs
 sudo apt-get install build-essential
 npm install --save express@4.10.2
 npm install --save socket.io
+npm install --save body-parser
 
 read -p "UNCOMMENT THE LINE: net.ipv4.ip_forward=1"
 sudo vim /etc/sysctl.conf

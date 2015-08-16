@@ -17,7 +17,7 @@
 
         // check if this private is the player's
         this.isMine = function() {
-            return this.playerId == this.room.id;
+            return this.playerId == this.room.playerId;
         }
 
         // check if this private area is claimed
@@ -38,7 +38,7 @@
         // claim the private area with the provided player
         this.claim = function(playerId) {
             this.playerId = playerId;
-            if (playerId == this.room.id) {
+            if (playerId == this.room.playerId) {
                 this.room.privateArea = this.room.privateAreas[this.id];
             }
             this.room.redraw(false);
@@ -46,7 +46,7 @@
 
         // unclaim the private area
         this.unclaim = function() {
-            if (this.playerId == this.room.id) {
+            if (this.playerId == this.room.playerId) {
                 delete this.room.privateArea;
             }
             delete this.playerId;

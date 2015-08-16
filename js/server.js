@@ -1,6 +1,8 @@
 // server communicator via Socket.IO
 function setUpServer(room) {
-    var socket = io();
+    var namespace = window.location.pathname;
+    console.log("namespace = " + namespace);
+    var socket = io(namespace);
     socket.on("m", function(msg) { document.parseMessage(room, msg); });
     return function(msg) {
         socket.emit("m", msg);
@@ -8,29 +10,34 @@ function setUpServer(room) {
 };
 
 (function(context) {
+    // setup
+    var moduleInitializer = typeof exports === "undefined"
+            ? document
+            : require(__dirname + "/initializer");
+
     // parse an incoming message
     context.parseMessage = function(room, msg) {
         var split = msg.split(" ");
         var cmd = split[0];
         if (cmd == "m") {
-            var id = parseInt(split[1]);
+            var playerId = parseInt(split[1]);
             var x = parseInt(split[2]);
             var y = parseInt(split[3]);
             room.cards.forEach(function(card) {
-                if (id in card.selectors) {
-                    var newX = x - card.selectors[id]["x"];
-                    var newY = y - card.selectors[id]["y"];
+                if (playerId in card.selectors) {
+                    var newX = x - card.selectors[playerId]["x"];
+                    var newY = y - card.selectors[playerId]["y"];
                     card.move(newX, newY, false);
                 }
             });
             room.redraw(false);
         } else if (cmd == "do") {
-            var id = parseInt(split[1]);
+            var playerId = parseInt(split[1]);
             var x = parseInt(split[2]);
             var y = parseInt(split[3]);
             room.cards.forEach(function(card) {
-                if (id in card.selectors) {
-                    card.setDraggingOffsetFor(id, x - card.locX, y - card.locY);
+                if (playerId in card.selectors) {
+                    card.setDraggingOffsetFor(playerId, x - card.locX, y - card.locY);
                 }
             });
         } else if (cmd == "am") {
@@ -39,13 +46,13 @@ function setUpServer(room) {
             var y = parseInt(split[3]);
             room.cardMap[cardId].move(x, y, false);
         } else if (cmd == "se") {
-            var id = parseInt(split[1]);
+            var playerId = parseInt(split[1]);
             var cardId = split[2];
-            room.cardMap[cardId].selectedBy(id);
+            room.cardMap[cardId].selectedBy(playerId);
         } else if (cmd == "us") {
-            var id = parseInt(split[1]);
+            var playerId = parseInt(split[1]);
             var cardId = split[2];
-            room.cardMap[cardId].unselectedBy(id);
+            room.cardMap[cardId].unselectedBy(playerId);
         } else if (cmd == "fl") {
             var cardId = parseInt(split[1]);
             room.cardMap[cardId].flip(true);
@@ -62,17 +69,18 @@ function setUpServer(room) {
                 arr[i - 3] = room.cardMap[parseInt(split[i])];
             room.formDeck(x, y, arr, false);
         } else if (cmd == "u+") {
-            var id = parseInt(split[1]);
+            var playerId = parseInt(split[1]);
             var color = split[2];
-            room.colorMap[id] = color;
+            room.colorMap[playerId] = color;
         } else if (cmd == "u-") {
-            console.log("A user has left.");
+            var playerId = parseInt(split[1]);
+            delete room.colorMap[playerId];
         } else if (cmd == "ss") {
             var i = 1;
             while (i < split.length && split[i] != "#") {
-                var id = parseInt(split[i++]);
+                var playerId = parseInt(split[i++]);
                 var color = split[i++];
-                room.colorMap[id] = color;
+                room.colorMap[playerId] = color;
             }
             ++i;
             for (var j = 0; j < room.privateAreas.length; ++j) {
@@ -102,24 +110,33 @@ function setUpServer(room) {
         } else if (cmd == "cp") {
             var toClaim = room.privateAreas[parseInt(split[1])];
             if (!toClaim.isClaimed()) {
-                var id = parseInt(split[2]);
+                var playerId = parseInt(split[2]);
                 room.privateAreas.forEach(function(privateArea) {
-                    if (id == privateArea.playerId) {
+                    if (playerId == privateArea.playerId) {
                         privateArea.unclaim();
                     }
                 });
-                toClaim.claim(id);
+                toClaim.claim(playerId);
             }
         } else if (cmd == "up") {
             var toUnclaim = room.privateAreas[parseInt(split[1])];
-            var id = parseInt(split[2]);
-            if (id == toUnclaim.playerId) {
+            var playerId = parseInt(split[2]);
+            if (playerId == toUnclaim.playerId) {
                 toUnclaim.unclaim();
             }
         } else if (cmd == "id") {
-            room.id = parseInt(split[1]);
+            room.playerId = parseInt(split[1]);
             room.color = split[2];
-            room.colorMap[room.id] = room.color;
+            room.colorMap[room.playerId] = room.color;
+        } else if (cmd == "gm") {
+            var game = split[1];
+            var deck;
+            if (game == "standard") {
+                deck = moduleInitializer.standardDeck(false);
+            } else {
+                deck = moduleInitializer.sushiGoDeck(false);
+            }
+            room.initializeDeck(deck);
         }
     };
 })(typeof exports === "undefined" ? document : exports);
