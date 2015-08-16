@@ -1,6 +1,5 @@
 body {
     background-color: #F2F2F2;
-    text-align: center;
 }
 
 #game-room {
@@ -10,18 +9,16 @@ body {
     height: 900px;
 }
 
-#deck-button-wrapper {
-    position: fixed;
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    height: 472px;
+#game-button-wrapper {
+    text-align: center;
 }
 
-.game-button-form {
-    display: inline;
+.game-choice {
+    display: inline-block;
+}
+
+.game-label {
+    font-size: 30px;
 }
 
 #standard-button, #sushi-go-button {
