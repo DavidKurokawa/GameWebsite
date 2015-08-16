@@ -44,6 +44,18 @@
                 x += 20;
             });
         });
+        ["R", "B"].forEach(function(color) {
+            deck.push(new moduleCard.Card(isServer,
+                                          "/imgs/standard/" + color + "J.png",
+                                          "/imgs/standard/big_" + color + "J.png",
+                                          "/imgs/standard/back.jpeg",
+                                          "/imgs/standard/big_back.jpeg",
+                                          x,
+                                          10,
+                                          100,
+                                          145));
+            x += 20;
+        });
         return deck;
     };
 
