@@ -5,7 +5,8 @@ var app = express();
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var initializer = require(__dirname + "/js/initializer");
-var coms = require(__dirname + "/js/server");
+var server = require(__dirname + "/js/server");
+var coms = new server.Server(true);
 var rooms = {};
 
 app.use(bodyParser());
@@ -26,7 +27,7 @@ app.post("/", function(req, res) {
     } else {
         deck = initializer.sushiGoDeck(true);
     }
-    var room = initializer.initializeRoom(true);
+    var room = initializer.initialize(true);
     room.initializeDeck(deck);
     var path = "/r/" + rand;
     var namespace = io.of(path);
@@ -60,19 +61,27 @@ app.post("/", function(req, res) {
             }
         }, 5*60*1000);
     }
+    
+    // emit the given chat message to the given medium
+    function emitChatMessage(medium, msg) {
+        console.log("c: " + msg.playerId + ": " + msg.content);
+        medium.emit("c", msg);
+    }
 
-    // emit the given message to the given medium
-    function emit(medium, msg) {
-        console.log("m: " + msg);
-        medium.emit("m", msg);
+    // emit the given instruction to the given medium
+    function emitInstruction(medium, msg) {
+        console.log("i: " + msg);
+        medium.emit("i", msg);
     }
 
     // sync the status of the provided medium
     function syncStatus(medium) {
         var msg = "ss";
         sockets.forEach(function(socket) {
-            if (typeof socket.playerId !== "undefined") {
-                msg += " " + socket.playerId + " " + socket.color;
+            var playerId = socket.playerId;
+            if (typeof playerId !== "undefined") {
+                var playerName = playerId in room.playerMap ? room.playerMap[playerId].name : "---";
+                msg += " " + playerId + " " + playerName + " " + socket.playerColor;
             }
         });
         msg += " #";
@@ -89,24 +98,22 @@ app.post("/", function(req, res) {
             }
             msg += " #";
         });
-        emit(medium, msg);
+        emitInstruction(medium, msg);
     }
 
     // connection handler
     namespace.on("connection", function(socket) {
         // handle a connection
         if (availableColors.length == 0) {
-            emit(socket, "rf");
+            emitInstruction(socket, "rf");
             socket.disconnect();
             return;
         }
         ++activeConnections;
-        socket.color = availableColors.pop();
+        socket.playerColor = availableColors.pop();
         socket.playerId = sockets.length;
-        var newUserSuffix = socket.playerId + " " + socket.color;
-        emit(socket, "gm " + game);
-        emit(socket, "id " + newUserSuffix);
-        emit(socket.broadcast, "u+ " + newUserSuffix);
+        emitInstruction(socket, "gm " + game);
+        emitInstruction(socket, "id " + socket.playerId + " " + socket.playerColor);
         syncStatus(socket);
         sockets.push(socket);
 
@@ -115,24 +122,33 @@ app.post("/", function(req, res) {
             if (--activeConnections == 0) {
                 ifRoomIsNotUsedCloseIt();
             }
-            availableColors.push(socket.color);
+            availableColors.push(socket.playerColor);
             room.privateAreas.forEach(function(privateArea) {
                 if (socket.playerId == privateArea.playerId) {
-                    emit(socket.broadcast, "up " + privateArea.id + " " + privateArea.playerId);
+                    emitInstruction(socket.broadcast, "up " + privateArea.id + " " + privateArea.playerId);
                     privateArea.unclaim();
                 }
             });
-            emit(socket.broadcast, "u- " + socket.playerId);
+            emitInstruction(socket.broadcast, "u- " + socket.playerId);
             delete socket.playerId;
-            delete socket.color;
+            delete socket.playerColor;
         });
 
-        // message handler
-        socket.on("m", function(msg) {
+        // chat message handler
+        socket.on("c", function(msg) {
+            var toSend = {
+                "playerId": socket.playerId,
+                "content": msg,
+            };
+            emitChatMessage(namespace, toSend);
+        });
+
+        // instruction handler
+        socket.on("i", function(msg) {
             var cmd = msg.substr(0, 2);
-            coms.parseMessage(room, msg);
+            coms.parseInstruction(room, msg);
             // TODO: basing the medium based off the cmd is hacky, better fix this soon!
-            emit(cmd == "cp" || cmd == "up" ? namespace : socket.broadcast, msg);
+            emitInstruction(cmd == "cp" || cmd == "up" ? namespace : socket.broadcast, msg);
         });
     });
 });

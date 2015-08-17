@@ -10,20 +10,36 @@
         moduleRoom = require(__dirname + "/room");
     }
 
-    // initialize the room
-    context.initializeRoom = function(isServer) {
+    // initialize
+    context.initialize = function(isServer) {
+        // get the player's name
+        var playerName;
+        if (!isServer) {
+            var attempted = false;
+            var maxLength = 16;
+            while (typeof playerName === "undefined"
+                    || playerName.length > maxLength
+                    || !/^[a-z0-9]+$/i.test(playerName)) {
+                var msg = "Enter your name (less than " + maxLength + " alphanumeric characters):"
+                if (attempted) {
+                    msg = "That was not a valid name.\n\n" + msg;
+                }
+                playerName = prompt(msg);
+                attempted = true;
+            }
+        }
+        // initialize the room
         var canvas;
         var canvasId = "game-room";
         var canvasWidth = 1200;
         var canvasHeight = 900;
         if (!isServer) {
-            canvas = document.createElement("canvas");
+            canvas = document.getElementById(canvasId);
             canvas.id = canvasId;
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
-            document.body.appendChild(canvas);
         }
-        return new moduleRoom.Room(isServer, canvas, canvasWidth, canvasHeight);
+        return new moduleRoom.Room(isServer, playerName, canvas, canvasWidth, canvasHeight);
     };
 
     // create a standard deck

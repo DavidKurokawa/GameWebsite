@@ -1,12 +1,8 @@
 body {
     background-color: #F2F2F2;
-}
-
-#game-room {
-    border: 1px solid black;
-    background-color: #FFFFFF;
-    width: 1200px;
-    height: 900px;
+    font: 18px Helvetica, Arial;
+    text-align: center;
+    overflow-x: auto;
 }
 
 #game-button-wrapper {
@@ -23,8 +19,8 @@ body {
 
 #standard-button, #sushi-go-button {
     background-size: 300px 468px;
-    height: 472px;
     width: 304px;
+    height: 472px;
 }
 
 #standard-button {
@@ -35,3 +31,64 @@ body {
     background-image: url("/imgs/sushi_go/big_back.png");
 }
 
+#play-area {
+    width: 1550px;
+}
+
+#game-box {
+    float: left;
+}
+
+#game-room {
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    width: 1200px;
+    height: 900px;
+}
+
+#chat-box {
+    float: left;
+    position: relative;
+    left: 10px;
+    width: 300px;
+    height: 900px;
+}
+
+#send-box {
+    width: 100%;
+    height: 30px;
+    border: 0px;
+}
+
+#message-to-send {
+    border: 1px solid black;
+    width: 248px;
+    height: 26px;
+    font: 18px Helvetica, Arial;
+}
+
+#send-button {
+    background-color: #F2F2F2;
+    width: 48px;
+    height: 30px;
+}
+
+#received-box {
+    width: 298px;
+    height: 820px;
+    border: 1px solid black;
+    text-align: left;
+    list-style-type: none;
+    overflow: hidden;
+    overflow-y: scroll;
+    padding: 0px;
+}
+
+#received-box li {
+    padding: 2px 2px;
+    word-wrap: break-word;
+}
+
+#received-box li:nth-child(odd) {
+    background-color: #F2F2F2;
+}

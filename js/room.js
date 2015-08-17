@@ -11,11 +11,12 @@
     }
 
     // game room
-    context.Room = function(isServer, canvas, canvasWidth, canvasHeight) {
+    context.Room = function(isServer, playerName, canvas, canvasWidth, canvasHeight) {
         // constructor
         this.playerId;
-        this.color;
-        this.colorMap = {};
+        this.playerName = playerName;
+        this.playerColor;
+        this.playerMap = {};
         this.canvas = canvas;
         this.width = canvasWidth;
         this.height = canvasHeight;
@@ -29,7 +30,8 @@
         this.isServer = isServer;
         if (!isServer) {
             this.ctx = canvas.getContext("2d");
-            this.send = setUpServer(this);
+            var server = new document.Server(isServer, this);
+            this.send = server.sendInstruction;
             var that = this;
             setTimeout(function() {
                 that.initialized = true;
