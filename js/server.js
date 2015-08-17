@@ -6,6 +6,7 @@
 
     // server to communicate
     context.Server = function(isServer, room) {
+        this.isServer = isServer;
         if (!isServer) {
             var namespace = window.location.pathname;
             console.log("namespace = " + namespace);
@@ -38,9 +39,14 @@
             var playerId = msg.playerId;
             var playerName = playerMap[playerId].name;
             var playerColor = playerMap[playerId].color;
-            var receivedBox = $("#received-box");
             var toOutput = playerName + " says: " + msg.content;
-            receivedBox.append($("<li>").text(toOutput).css("color", playerColor));
+            this.outputChatMessage(toOutput, playerColor);
+        }
+
+        // output an actual message in the chat box
+        this.outputChatMessage = function(msg, color) {
+            var receivedBox = $("#received-box");
+            receivedBox.append($("<li>").text(msg).css("color", color));
             receivedBox.stop().animate({
                 scrollTop: receivedBox[0].scrollHeight
             }, 200);
@@ -108,6 +114,9 @@
                     "name": playerName,
                     "color": playerColor,
                 };
+                if (!this.isServer) {
+                    this.outputChatMessage(playerName + " has joined!", playerColor);
+                }
             } else if (cmd == "u-") {
                 var playerId = parseInt(split[1]);
                 delete room.playerMap[playerId];
