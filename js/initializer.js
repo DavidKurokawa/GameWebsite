@@ -38,6 +38,7 @@
             canvas.id = canvasId;
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
+            canvas.onselectstart = function() { return false; }
         }
         return new moduleRoom.Room(isServer, playerName, canvas, canvasWidth, canvasHeight);
     };
