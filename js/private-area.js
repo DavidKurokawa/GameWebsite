@@ -59,10 +59,10 @@
                 return;
             }
             if (this.isClaimed()) {
-                var color = this.room.colorMap[this.playerId];
-                this.ctx.strokeStyle = color;
+                var playerColor = this.room.playerMap[this.playerId].color;
+                this.ctx.strokeStyle = playerColor;
                 this.ctx.strokeRect(this.x1, this.y1, this.x2 - this.x1, this.y2 - this.y1);
-                this.ctx.fillStyle = color;
+                this.ctx.fillStyle = playerColor;
                 this.ctx.fillRect(this.claimX1,
                                   this.claimY1,
                                   this.claimX2 - this.claimX1,
