@@ -38,6 +38,15 @@ function initializeBeforeName() {
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
             canvas.onselectstart = function() { return false; }
+            $.blockUI.defaults.css.top = "10%";
+            $.blockUI.defaults.css.cursor = "default";
+            $.blockUI.defaults.overlayCSS.cursor = "default";
+            $(document).ready(function() { 
+                $("#instruction-button").click(function() { 
+                    $.blockUI({"message": $("#instructions")}); 
+                    $(".blockOverlay").click($.unblockUI); 
+                }); 
+            }); 
         }
         return new moduleRoom.Room(isServer, playerName, canvas, canvasWidth, canvasHeight);
     };

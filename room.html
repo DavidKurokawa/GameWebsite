@@ -4,8 +4,9 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1, IE=edge">
     <link rel="stylesheet" type="text/css" media="all" href="/css/style.css" />
     <title>Game Room</title>
-    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script> <!-- TODO  -->
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script> <!-- TODO  -->
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="/js/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="/js/card.js"></script>
     <script type="text/javascript" src="/js/initializer.js"></script>
     <script type="text/javascript" src="/js/input-listeners.js"></script>
@@ -24,19 +25,50 @@
     <form id="name-box">
         Please enter your name (only alphanumeric characters):</br>
         </br>
-        <input id="name" type="text" maxlength="32"/>
+        <input id="name" type="text" maxlength="32" autocomplete="off"/>
         <input type="submit" value="submit"/>
     </form>
     <div id="play-area">
         <div id="game-box">
             <canvas id="canvas"></canvas>
         </div>
-        <div id="chat-box">
-            <ul id="received-box"></ul>
-            <form id="send-box" action="">
-                <input id="message" autocomplete="off"/>
-                <input id="send-message-button" type="submit" value="send"/>
-            </form>
+        <div id="right-column">
+            <div id="instructions">
+                Gameplay:
+                <ul>
+                    <li>create a room, then use the link to invite others</li>
+                    <li>maximum of four players per room</li>
+                    <li>rooms are cleared after five minutes of no players</li>
+                </ul>
+                Mouse Controls:
+                <ul>
+                    <li>click a card to select it</li>
+                    <li>click and drag or click + ctrl to select/unselect multiple cards</li>
+                    <li>double click a card to flip it over</li>
+                    <li>double click a corner to claim a private area</li>
+                    <li>click and hold to move selected cards</li>
+                    <li>right click and hold to view an enlarged version of a card</li>
+                </ul>
+                Keyboard Controls:
+                <ul>
+                    <li>s = shuffle selected cards</li>
+                    <li>d = form a deck with selected cards</li>
+                    <li>f = flip over selected cards</li>
+                </ul>
+                About:
+                <ul>
+                    <li>created by David Kurokawa</li>
+                    <li>tested only on linux chrome</li>
+                <ul>
+            </div>
+            <button id="instruction-button">Instructions</button>
+            <div id="chat-box">
+                <ul id="received-box"></ul>
+                <form id="send-box" action="">
+                    <input id="message" autocomplete="off"/>
+                    <input id="message-button" type="submit" value="send"/>
+                </form>
+            </div>
         </div>
     </div>
 </body>

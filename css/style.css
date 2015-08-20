@@ -1,4 +1,4 @@
-body, #name, #message {
+body, #name, #instruction-button, #message, #message-button {
     font: 18px Helvetica, Arial;
 }
 
@@ -54,12 +54,24 @@ body {
     height: 900px;
 }
 
-#chat-box {
-    float: left;
+#right-column {
+    float:left;
     position: relative;
     left: 10px;
+}
+
+#instructions {
+    display: none;
+    text-align: left;
+}
+
+#instruction-button {
+    width: 290px;
+}
+
+#chat-box {
     width: 300px;
-    height: 900px;
+    height: 880px;
 }
 
 #send-box {
@@ -70,20 +82,21 @@ body {
 
 #message {
     border: 1px solid black;
-    width: 248px;
+    width: 240px;
     height: 26px;
 }
 
-#send-message-button {
+#message-button {
     background-color: #F2F2F2;
-    width: 42px;
+    width: 50px;
     height: 30px;
+    text-align: center;
 }
 
 #received-box {
     background-color: #FFFFFF;
     width: 298px;
-    height: 820px;
+    height: 800px;
     border: 1px solid black;
     text-align: left;
     list-style-type: none;
