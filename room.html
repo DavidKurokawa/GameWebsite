@@ -15,20 +15,27 @@
     <script type="text/javascript" src="/js/server.js"></script>
     <script type="text/javascript">
         window.onload = function() {
-            document.initialize(false);
+            initializeBeforeName();
         }
     </script>
 </head>
 
 <body>
+    <form id="name-box">
+        Please enter your name (only alphanumeric characters):</br>
+        </br>
+        <input id="name" type="text" maxlength="32"/>
+        <input type="submit" value="submit"/>
+    </form>
     <div id="play-area">
         <div id="game-box">
-            <canvas id="game-room"></canvas>
+            <canvas id="canvas"></canvas>
         </div>
         <div id="chat-box">
             <ul id="received-box"></ul>
             <form id="send-box" action="">
-                <input id="message-to-send" autocomplete="off"/><button id="send-button">send</button>
+                <input id="message" autocomplete="off"/>
+                <input id="send-message-button" type="submit" value="send"/>
             </form>
         </div>
     </div>

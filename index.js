@@ -27,7 +27,7 @@ app.post("/", function(req, res) {
     } else {
         deck = initializer.sushiGoDeck(true);
     }
-    var room = initializer.initialize(true);
+    var room = initializer.initializeAfterName(true);
     room.initializeDeck(deck);
     var path = "/r/" + rand;
     var namespace = io.of(path);

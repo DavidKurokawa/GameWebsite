@@ -14,10 +14,10 @@
             var that = this;
             socket.on("c", function(msg) { that.parseChatMessage(room.playerMap, msg); });
             $("#send-box").submit(function() {
-                var msg = $("#message-to-send").val();
+                var msg = $("#message").val();
                 if (msg.trim().length > 0) {
                     that.sendChatMessage(msg);
-                    $("#message-to-send").val("");
+                    $("#message").val("");
                 }
                 return false;
             });

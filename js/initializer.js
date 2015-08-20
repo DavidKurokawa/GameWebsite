@@ -1,3 +1,17 @@
+function initializeBeforeName() {
+    $("#name-box").submit(function() {
+        var name = $("#name").val();
+        // TODO: we should also check the name server side
+        if (typeof name !== "undefined" && /^[a-z0-9]+$/i.test(name)) {
+            $("#name-box").remove();
+            document.initializeAfterName(false, name);
+        } else {
+            $("#name").val("");
+        }
+        return false;
+    });
+}
+
 (function(context) {
     // setup
     var moduleCard;
@@ -11,29 +25,14 @@
     }
 
     // initialize
-    context.initialize = function(isServer) {
-        // get the player's name
-        var playerName;
-        if (!isServer) {
-            var attempted = false;
-            var maxLength = 16;
-            while (typeof playerName === "undefined"
-                    || playerName.length > maxLength
-                    || !/^[a-z0-9]+$/i.test(playerName)) {
-                var msg = "Enter your name (less than " + maxLength + " alphanumeric characters):"
-                if (attempted) {
-                    msg = "That was not a valid name.\n\n" + msg;
-                }
-                playerName = prompt(msg);
-                attempted = true;
-            }
-        }
+    context.initializeAfterName = function(isServer, playerName) {
         // initialize the room
         var canvas;
-        var canvasId = "game-room";
+        var canvasId = "canvas";
         var canvasWidth = 1200;
         var canvasHeight = 900;
         if (!isServer) {
+            document.getElementById("play-area").style.display = "block";
             canvas = document.getElementById(canvasId);
             canvas.id = canvasId;
             canvas.width = canvasWidth;
