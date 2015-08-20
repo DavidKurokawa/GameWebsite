@@ -137,8 +137,8 @@ function setUpInputListeners(room) {
     // handle mouse move events
     function handleMouseMove(e) {
         hasMouseMovedWhenDown = true;
-        mouseX = e.clientX - room.offsetX();
-        mouseY = e.clientY - room.offsetY();
+        mouseX = Math.round(e.clientX - room.offsetX());
+        mouseY = Math.round(e.clientY - room.offsetY());
         if (isLeftMouseButtonDown && !isGroupSelecting) {
             room.send("m " + room.playerId + " " + mouseX + " " + mouseY);
             room.cards.forEach(function(card) {

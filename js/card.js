@@ -169,8 +169,6 @@
             x = Math.min(x, this.room.width - this.width);
             y = Math.max(y, 0);
             y = Math.min(y, this.room.height - this.height);
-            x = parseInt(x);
-            y = parseInt(y);
             this.locX = x;
             this.locY = y;
         }

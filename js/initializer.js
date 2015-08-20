@@ -1,3 +1,4 @@
+// TODO: should probably not wait for the name to start loading everything!
 function initializeBeforeName() {
     $("#name-box").submit(function() {
         var name = $("#name").val();
