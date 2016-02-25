@@ -21,23 +21,14 @@
         this.width = canvasWidth;
         this.height = canvasHeight;
         var claimAreaSize = 15;
-        // TODO: this is pretty hacky!
-        // we do this waiting for a few purposes:
-        // 1. we need to get the state from another connection if there are others
-        // 2. the images need to be downloaded from the server
-        // 3. we need to know the player id of the room to determine the private area
         this.initialized = isServer;
         this.isServer = isServer;
         if (!isServer) {
+            $.blockUI(); 
             this.ctx = canvas.getContext("2d");
             var server = new document.Server(isServer, this);
             this.send = server.sendInstruction;
             var that = this;
-            setTimeout(function() {
-                that.initialized = true;
-                that.redraw(false);
-                setUpInputListeners(that);
-            }, 2000);
         }
         this.privateAreas = [
             new modulePrivateArea.PrivateArea(0,
@@ -82,9 +73,14 @@
                                               this.height)
         ];
         this.displayed;
+        // load count = 2 because:
+        // 1. we need to get the state from another connection if there are others
+        // 2. we need to know the player id of the room to determine the private area
+        this.loadCount = 2;
 
         // initialize deck
         this.initializeDeck = function(deck) {
+            this.loadCount = this.loadCount + deck.length;
             for (var i = 0; i < deck.length; ++i) {
                 deck[i].id = i;
             }
@@ -94,6 +90,17 @@
             this.cardMap.forEach(function(card) {
                 card.setRoom(that);
             });
+        }
+
+        // decrement the count of the images to be loaded
+        this.decrementLoadCount = function() {
+            this.loadCount = this.loadCount - 1;
+            if (this.loadCount == 0) {
+                this.initialized = true;
+                this.redraw(false);
+                setUpInputListeners(this);
+                $.unblockUI();
+            }
         }
 
         // get the x offset of the room

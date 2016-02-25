@@ -39,6 +39,11 @@
             this.room = room;
             this.ctx = room.ctx;
             this.send = room.send;
+            if (!this.isServer) {
+                this.imgFront.onload = function() {
+                    room.decrementLoadCount();
+                }
+            }
         }
 
         // check if the given point is inside the given rectangle
