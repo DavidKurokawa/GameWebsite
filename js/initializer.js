@@ -48,6 +48,15 @@ function initializeBeforeName() {
                     $(".blockOverlay").click($.unblockUI); 
                 }); 
             }); 
+            function handleResize() {
+                var newHeight = $("#canvas").height()
+                        - $("#instruction-button").height()
+                        - $("#send-box").height()
+                        - 50;
+                $("#received-box").height(newHeight);
+            }
+            handleResize();
+            $(window).resize(function() { handleResize(); });
         }
         return new moduleRoom.Room(isServer, playerName, canvas, canvasWidth, canvasHeight);
     };
