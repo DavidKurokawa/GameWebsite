@@ -30,8 +30,8 @@ function initializeBeforeName() {
         // initialize the room
         var canvas;
         var canvasId = "canvas";
-        var canvasWidth = 1200;
-        var canvasHeight = 900;
+        var canvasWidth = 1600;
+        var canvasHeight = 1200;
         if (!isServer) {
             document.getElementById("play-area").style.display = "block";
             canvas = document.getElementById(canvasId);
@@ -63,10 +63,10 @@ function initializeBeforeName() {
                                               "/imgs/standard/big_" + rank + suit + ".png",
                                               "/imgs/standard/back.jpeg",
                                               "/imgs/standard/big_back.jpeg",
-                                              x,
-                                              10,
-                                              100,
-                                              145));
+                                              x/1200.0,
+                                              10/900.0,
+                                              100/1200.0,
+                                              145/900.0));
                 x += 20;
             });
         });
@@ -76,10 +76,10 @@ function initializeBeforeName() {
                                           "/imgs/standard/big_" + color + "J.png",
                                           "/imgs/standard/back.jpeg",
                                           "/imgs/standard/big_back.jpeg",
-                                          x,
-                                          10,
-                                          100,
-                                          145));
+                                          x/1200.0,
+                                          10/900.0,
+                                          100/1200.0,
+                                          145/900.0));
             x += 20;
         });
         return deck;
@@ -111,10 +111,10 @@ function initializeBeforeName() {
                                                   "/imgs/sushi_go/big_" + type + ".png",
                                                   "/imgs/sushi_go/back.png",
                                                   "/imgs/sushi_go/big_back.png",
-                                                  x,
-                                                  y,
-                                                  100,
-                                                  156));
+                                                  x/1200.0,
+                                                  y/900.0,
+                                                  100/1200.0,
+                                                  156/900.0));
                     x += 20;
                     if (++total == 54) {
                         x = 10;

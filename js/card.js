@@ -66,18 +66,6 @@
                                             this.locY + this.height);
         }
         
-        // check if the card were at the given coordinates would it still be on the canvas
-        this.isInsideCanvas = function(x, y) {
-            return this.isRectangleInsideRectangle(x,
-                                                   y,
-                                                   x + this.width,
-                                                   y + this.height,
-                                                   0,
-                                                   0,
-                                                   this.room.width,
-                                                   this.room.height);
-        }
-
         // check if the card is contained in the given rectangle
         this.isContainedIn = function(x1, y1, x2, y2) {
             return this.isRectangleInsideRectangle(this.locX,
@@ -125,10 +113,10 @@
             if (this.isServer) {
                 return;
             }
-            var x = this.locX;
-            var y = this.locY;
-            var w = this.width;
-            var h = this.height;
+            var x = Math.floor(this.locX*this.room.maxWidth());
+            var y = Math.floor(this.locY*this.room.maxHeight());
+            var w = Math.floor(this.width*this.room.maxWidth());
+            var h = Math.floor(this.height*this.room.maxHeight());
             var isPrivate = this.isInsidePrivateArea();
             var isPublic = this.isInsidePublicArea();
             if (this.isUpPrivately == this.isUpPublicly || isPrivate || isPublic) {
@@ -158,7 +146,7 @@
                                    croppedHeight);
             }
             this.ctx.strokeStyle = this.isSelected ? "#FF0000" : "#000000";
-            this.ctx.strokeRect(this.locX, this.locY, this.width, this.height);
+            this.ctx.strokeRect(x, y, w, h);
             this.room.redrawPrivateAreas();
         };
 
@@ -171,15 +159,15 @@
         // move the card
         this.move = function(x, y, report) { // TODO: no longer need this report!
             x = Math.max(x, 0);
-            x = Math.min(x, this.room.width - this.width);
+            x = Math.min(x, 1 - this.width);
             y = Math.max(y, 0);
-            y = Math.min(y, this.room.height - this.height);
+            y = Math.min(y, 1 - this.height);
             this.locX = x;
             this.locY = y;
         }
 
         // select the card
-        this.select = function(x, y) {
+        this.select = function(x, y) { // TODO: why does this have x and y?
             if (!this.isSelected) {
                 this.send("se " + this.room.playerId + " " + this.id);
             }
