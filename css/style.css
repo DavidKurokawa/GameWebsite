@@ -66,6 +66,7 @@ body {
 #instructions {
     display: none;
     text-align: left;
+    overflow: auto;
 }
 
 #instruction-button {

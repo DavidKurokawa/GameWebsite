@@ -44,6 +44,8 @@ function initializeBeforeName() {
             $.blockUI.defaults.overlayCSS.cursor = "default";
             $(document).ready(function() { 
                 $("#instruction-button").click(function() { 
+                    $("#instructions").css("max-height", $(window).height());
+                    $("#instructions").css("max-width", $(window).width() - 200);
                     $.blockUI({"message": $("#instructions")}); 
                     $(".blockOverlay").click($.unblockUI); 
                 }); 
