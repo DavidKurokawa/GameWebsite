@@ -51,10 +51,7 @@ function initializeBeforeName() {
                 }); 
             }); 
             function handleResize() {
-                var newHeight = $("#canvas").height()
-                        - $("#instruction-button").height()
-                        - $("#send-box").height()
-                        - 50;
+                var newHeight = $("#canvas").height() - ($("#right-column").height() - $("#received-box").height());
                 $("#received-box").height(newHeight);
             }
             handleResize();

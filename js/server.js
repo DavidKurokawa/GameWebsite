@@ -116,10 +116,17 @@
                 };
                 if (!this.isServer) {
                     this.outputChatMessage(playerName + " has joined!", playerColor);
+                    room.updatePlayerBox();
                 }
             } else if (cmd == "u-") {
                 var playerId = parseInt(split[1]);
+                var playerName = room.playerMap[playerId].name;
+                var playerColor = room.playerMap[playerId].color;
                 delete room.playerMap[playerId];
+                if (!this.isServer) {
+                    this.outputChatMessage(playerName + " has left!", playerColor);
+                    room.updatePlayerBox();
+                }
             } else if (cmd == "ss") {
                 var i = 1;
                 while (i < split.length && split[i] != "#") {
@@ -157,6 +164,7 @@
                 room.cards = new document.DoublyLinkedList(newCards);
                 room.redraw(false);
                 room.decrementLoadCount();
+                room.updatePlayerBox();
             } else if (cmd == "cp") {
                 var toClaim = room.privateAreas[parseInt(split[1])];
                 if (!toClaim.isClaimed()) {
@@ -184,6 +192,7 @@
                 var toSend = "u+ " + room.playerId + " " + room.playerName + " " + room.playerColor;
                 this.sendInstruction(toSend);
                 room.decrementLoadCount();
+                room.updatePlayerBox();
             } else if (cmd == "gm") {
                 var game = split[1];
                 var deck;

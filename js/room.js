@@ -28,7 +28,7 @@
             this.ctx = canvas.getContext("2d");
             var server = new document.Server(isServer, this);
             this.send = server.sendInstruction;
-            var that = this;
+            this.playerList = document.getElementById("player-list");
         }
         this.privateAreas = [
             new modulePrivateArea.PrivateArea(0,
@@ -101,6 +101,17 @@
                 setUpInputListeners(this);
                 $.unblockUI();
             }
+        }
+
+        // update player box
+        this.updatePlayerBox = function() {
+            var innerHTML = "";
+            for (var playerId in this.playerMap) {
+                var playerName = this.playerMap[playerId].name;
+                var playerColor = this.playerMap[playerId].color;
+                innerHTML += "<li style=\"color:" + playerColor + "\";>" + playerName + "</li>";
+            }
+            this.playerList.innerHTML = innerHTML;
         }
 
         // get the x offset of the room

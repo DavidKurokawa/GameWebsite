@@ -73,6 +73,24 @@ body {
     width: 90%;
 }
 
+#player-box {
+    height: 170px;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    margin-top: 10px;
+}
+
+#player-list {
+    text-align: left;
+    overflow: hidden;
+    background-color: #FFFFFF;
+}
+
+#player-list li {
+    background-color: #FFFFFF;
+}
+
 #chat-box {
     width: 100%;
 }
