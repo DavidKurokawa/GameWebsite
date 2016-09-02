@@ -11,13 +11,15 @@
     }
 
     // game room
-    context.Room = function(isServer, playerName, canvas, maxWidth, maxHeight) {
+    context.Room = function(isServer, playerName, canvas, canvasWidth, canvasHeight) {
         // constructor
         this.playerId;
         this.playerName = playerName;
         this.playerColor;
         this.playerMap = {};
         this.canvas = canvas;
+        this.width = canvasWidth;
+        this.height = canvasHeight;
         var claimAreaSize = 15;
         this.initialized = isServer;
         this.isServer = isServer;
@@ -33,42 +35,42 @@
                                               this,
                                               0,
                                               0,
-                                              3*maxWidth/4,
-                                              maxHeight/4,
+                                              3*this.width/4,
+                                              this.height/4,
                                               0,
                                               0,
                                               claimAreaSize,
                                               claimAreaSize),
             new modulePrivateArea.PrivateArea(1,
                                               this,
-                                              3*maxWidth/4,
+                                              3*this.width/4,
                                               0,
-                                              maxWidth,
-                                              3*maxHeight/4,
-                                              maxWidth - claimAreaSize,
+                                              this.width,
+                                              3*this.height/4,
+                                              this.width - claimAreaSize,
                                               0,
-                                              maxWidth,
+                                              this.width,
                                               claimAreaSize),
             new modulePrivateArea.PrivateArea(2,
                                               this,
                                               0,
-                                              maxHeight/4,
-                                              maxWidth/4,
-                                              maxHeight,
+                                              this.height/4,
+                                              this.width/4,
+                                              this.height,
                                               0,
-                                              maxHeight - claimAreaSize,
+                                              this.height - claimAreaSize,
                                               claimAreaSize,
-                                              maxHeight),
+                                              this.height),
             new modulePrivateArea.PrivateArea(3,
                                               this,
-                                              maxWidth/4,
-                                              3*maxHeight/4,
-                                              maxWidth,
-                                              maxHeight,
-                                              maxWidth - claimAreaSize,
-                                              maxHeight - claimAreaSize,
-                                              maxWidth,
-                                              maxHeight)
+                                              this.width/4,
+                                              3*this.height/4,
+                                              this.width,
+                                              this.height,
+                                              this.width - claimAreaSize,
+                                              this.height - claimAreaSize,
+                                              this.width,
+                                              this.height)
         ];
         this.displayed;
         // load count = 2 because:
@@ -101,26 +103,6 @@
             }
         }
 
-        // get the width of the room
-        this.width = function() {
-            return this.canvas.clientWidth;
-        }
-
-        // get the height of the room
-        this.height = function() {
-            return this.canvas.clientHeight;
-        }
-
-        // get the max width of the room
-        this.maxWidth = function() {
-            return this.canvas.width;
-        }
-
-        // get the max height of the room
-        this.maxHeight = function() {
-            return this.canvas.height;
-        }
-
         // get the x offset of the room
         this.offsetX = function() {
             return this.canvas.getBoundingClientRect().left;
@@ -136,7 +118,7 @@
             if (!this.initialized || this.isServer) {
                 return;
             }
-            this.ctx.clearRect(0, 0, this.maxWidth(), this.maxHeight());
+            this.ctx.clearRect(0, 0, this.width, this.height);
             this.cards.forEach(function(card) {
                 card.draw();
             });
@@ -145,12 +127,12 @@
                 this.send("rd");
             }
             if (typeof this.displayed !== "undefined") {
-                var factor = Math.min(this.maxWidth()/this.displayed.width,
-                                      this.maxHeight()/this.displayed.height);
+                var factor = Math.min(this.width/this.displayed.width,
+                                      this.height/this.displayed.height);
                 var w = factor*this.displayed.width;
                 var h = factor*this.displayed.height;
-                var x = (this.maxWidth() - w)/2;
-                var y = (this.maxHeight() - h)/2;
+                var x = (this.width - w)/2;
+                var y = (this.height - h)/2;
                 this.ctx.drawImage(this.displayed, x, y, w, h);
             }
         }
@@ -289,7 +271,7 @@
 
         // move given cards toward the given coordinates
         this.moveCardsTowards = function(x, y, cardsToMove) {
-            var SPEED = 0.1;
+            var SPEED = 20;
             var done = true;
             cardsToMove.forEach(function(card) {
                 var cardX = card.locX;

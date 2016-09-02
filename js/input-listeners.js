@@ -137,8 +137,8 @@ function setUpInputListeners(room) {
     // handle mouse move events
     function handleMouseMove(e) {
         hasMouseMovedWhenDown = true;
-        mouseX = (e.clientX - room.offsetX())/room.width();
-        mouseY = (e.clientY - room.offsetY())/room.height();
+        mouseX = Math.round(e.clientX - room.offsetX());
+        mouseY = Math.round(e.clientY - room.offsetY());
         if (isLeftMouseButtonDown && !isGroupSelecting) {
             room.send("m " + room.playerId + " " + mouseX + " " + mouseY);
             room.cards.forEach(function(card) {
@@ -153,13 +153,11 @@ function setUpInputListeners(room) {
             room.redraw(false);
         }
         if (isGroupSelecting) {
-            var maxWidth = room.maxWidth();
-            var maxHeight = room.maxHeight();
             room.ctx.strokeStyle = "#FF0000";
-            room.ctx.strokeRect(groupSelectionX*maxWidth,
-                                groupSelectionY*maxHeight,
-                                (mouseX - groupSelectionX)*maxWidth,
-                                (mouseY - groupSelectionY)*maxHeight);
+            room.ctx.strokeRect(groupSelectionX,
+                                groupSelectionY,
+                                mouseX - groupSelectionX,
+                                mouseY - groupSelectionY);
         }
         if (isRightMouseButtonDown) {
             enlargeTopmostCardAtMouseLocation();
@@ -189,7 +187,6 @@ function setUpInputListeners(room) {
     // handle key press events
     function handleKeyPress(e) {
         var code = e.keyCode || e.charCode;
-        // TODO: is this seriously the best way to handle this?
         console.log("keycode = " + code);
         if (code == 100) {
             room.formDeck(mouseX, mouseY, room.getSelectedCards(), true);
