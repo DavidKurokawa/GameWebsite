@@ -27,15 +27,15 @@ function initializeBeforeName() {
 
     // initialize
     context.initializeAfterName = function(isServer, playerName) {
+        // TODO: this mish-mash of using jquery and pure javascript is probably bad practice?
         // initialize the room
         var canvas;
-        var canvasId = "canvas";
         var canvasWidth = 1200;
         var canvasHeight = 900;
         if (!isServer) {
             document.getElementById("play-area").style.display = "block";
-            canvas = document.getElementById(canvasId);
-            canvas.id = canvasId;
+            canvas = document.getElementById("canvas");
+            canvas.id = "canvas";
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
             canvas.onselectstart = function() { return false; }
@@ -51,8 +51,16 @@ function initializeBeforeName() {
                 }); 
             }); 
             function handleResize() {
-                var newHeight = $("#canvas").height() - ($("#right-column").height() - $("#received-box").height());
-                $("#received-box").height(newHeight);
+                var maxHeight = $(window).height() - 50;
+                var maxWidth = $(window).width() - $("#right-column").width() - 50;
+                var canvasSizeFactor = Math.min(maxHeight/canvasHeight, maxWidth/canvasWidth);
+                var canvasStyleWidth = Math.round(canvasWidth*canvasSizeFactor);
+                var canvasStyleHeight = Math.round(canvasHeight*canvasSizeFactor);
+                canvas.style.width = canvasStyleWidth + "px";
+                canvas.style.height = canvasStyleHeight + "px";
+                var receivedBoxHeight = canvasStyleHeight
+                        - ($("#right-column").height() - $("#received-box").height());
+                $("#received-box").height(receivedBoxHeight);
             }
             handleResize();
             $(window).resize(function() { handleResize(); });
